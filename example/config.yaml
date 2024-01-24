@@ -3,7 +3,7 @@ name: Optimal Scheduler
 version: "1.2.3"
 slug: example
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
-url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/example"
+url: "https://github.com/home-assistant/addons-example/tree/main/example"
 arch:
   - armhf
   - armv7
