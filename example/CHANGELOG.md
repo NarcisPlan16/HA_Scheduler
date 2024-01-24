@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.2.3
+- Changed addon name
+
 ## 1.2.2
 - Changed addon info
 

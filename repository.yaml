@@ -1,4 +1,4 @@
 # https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
-name: Scheduler add-on repository
+name: Optimal Scheduler add-on repository
 url: 'https://github.com/NarcisPlan16/HA_Scheduler'
 maintainer: Narcís Planellas <feinanarcis@gmail.com>
