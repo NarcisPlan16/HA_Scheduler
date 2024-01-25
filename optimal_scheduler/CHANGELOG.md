@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.2.10
+- Changed .devcontainer.json Repository name
+
 ## 1.2.9
 - Changed config.yaml image
 
