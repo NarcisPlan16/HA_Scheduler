@@ -1,6 +1,9 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
-## 1.2.10
+## 1.2.11
+- Revert .devcontainer.json Repository name
+
+## 1.2.11
 - Changed .devcontainer.json Repository name
 
 ## 1.2.9
