@@ -12,6 +12,8 @@ RUN \
 COPY rootfs /
 
 RUN ls -l > file_list.txt
+# Print the content of the file to the console
+RUN cat file_list.txt
 
 #----------PYTHON----------
 FROM python:3.8-alpine
@@ -23,7 +25,7 @@ FROM python:3.8-alpine
 #COPY main.py /app/main.py
 
 # Set the working directory
-WORKDIR /app
+#WORKDIR /app
 
 # Command to run when the container starts
 #CMD ["python", "main.py"]
