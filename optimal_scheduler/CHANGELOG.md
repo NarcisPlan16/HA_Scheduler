@@ -1,5 +1,7 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.2.14
+
 ## 1.2.13
 - Changed DOCS and add-on README
 - Started changing configuration (options)
