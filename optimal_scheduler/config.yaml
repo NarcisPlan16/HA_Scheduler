@@ -14,8 +14,8 @@ init: false
 map:
   - share:rw
 options:
-  message: "Hello world..."
-  erun_button": "Run OS",
+  message: "Hello world...",
+  run_button": "Run OS"
 schema:
   message: "str?"
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
