@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.2.12
+- Commented image on config
+
 ## 1.2.11
 - Revert .devcontainer.json Repository name
 
