@@ -25,4 +25,4 @@ WORKDIR /app
 
 # Command to run when the container starts
 #CMD ["python", "main.py"]
-CMD ["bash", "ls"]
+CMD ["bin/ls", "-l"]
