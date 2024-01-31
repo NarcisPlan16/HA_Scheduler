@@ -1,7 +1,7 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
-## 1.2.18
-- Quickfix from 1.2.13 to 1.2.18
+## 1.2.19
+- Quickfix from 1.2.13 to 1.2.19
 
 ## 1.2.13
 - Changed DOCS and add-on README
