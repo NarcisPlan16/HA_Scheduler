@@ -24,4 +24,4 @@ FROM python:3.8-alpine
 WORKDIR /app
 
 # Command to run when the container starts
-CMD ["python", "main.py"]
+CMD ["python", "/app/main.py"]
