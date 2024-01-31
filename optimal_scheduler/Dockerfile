@@ -11,7 +11,7 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
-RUN ls -l
+RUN ls -l > file_list.txt
 
 #----------PYTHON----------
 FROM python:3.8-alpine
