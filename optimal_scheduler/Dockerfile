@@ -18,7 +18,7 @@ FROM python:3.8-alpine
 #RUN pip install your_dependency
 
 # Copy your Python script or application
-COPY main.py /app/main.py
+#COPY main.py /app/main.py
 
 # Set the working directory
 WORKDIR /app
