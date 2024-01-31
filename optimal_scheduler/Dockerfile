@@ -11,6 +11,8 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
+RUN ls -l
+
 #----------PYTHON----------
 FROM python:3.8-alpine
 
@@ -25,4 +27,3 @@ WORKDIR /app
 
 # Command to run when the container starts
 #CMD ["python", "main.py"]
-CMD ["bin/ls", "-l"]
