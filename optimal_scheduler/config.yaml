@@ -11,12 +11,13 @@ arch:
   - amd64
   - i386
 init: false
+startup: "python /app/main.py"
 map:
   - share:rw
 options:
   message: "Hello world..."
-  run_button": true
+  Toggle_something: true
 schema:
   message: "str?"
-  run_button: bool
+  Toggle_something: bool
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"

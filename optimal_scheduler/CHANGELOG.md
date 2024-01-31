@@ -3,6 +3,7 @@
 ## 1.2.13
 - Changed DOCS and add-on README
 - Started changing configuration (options)
+- Added app folder and main py program
 
 ## 1.2.12
 - Commented image on config
