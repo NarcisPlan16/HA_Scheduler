@@ -10,3 +10,18 @@ RUN \
 
 # Copy root filesystem
 COPY rootfs /
+
+#----------PYTHON----------
+FROM python:3.8-alpine
+
+# Install dependencies
+#RUN pip install your_dependency
+
+# Copy your Python script or application
+COPY main.py /app/main.py
+
+# Set the working directory
+WORKDIR /app
+
+# Command to run when the container starts
+CMD ["python", "main.py"]

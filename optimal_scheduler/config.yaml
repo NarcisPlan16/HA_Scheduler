@@ -11,7 +11,6 @@ arch:
   - amd64
   - i386
 init: false
-startup: "python /app/main.py"
 map:
   - share:rw
 options:
