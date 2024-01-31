@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Example add-on
+# Optimal Scheduler Add-on
 
 ## How to use
 
