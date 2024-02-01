@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "1.2.21"
+version: "1.2.22"
 slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
