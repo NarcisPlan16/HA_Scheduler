@@ -11,10 +11,6 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
-RUN ls -l > file_list.txt
-# Print the content of the file to the console
-RUN cat file_list.txt
-
 #----------PYTHON----------
 FROM python:3.8-alpine
 
@@ -28,4 +24,4 @@ FROM python:3.8-alpine
 #WORKDIR /app
 
 # Command to run when the container starts
-#CMD ["python", "main.py"]
+CMD ["python", "main.py"]
