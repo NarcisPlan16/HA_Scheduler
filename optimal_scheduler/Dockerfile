@@ -15,13 +15,13 @@ COPY rootfs /
 FROM python:3.8-alpine
 
 # Install dependencies
-#RUN pip install your_dependency
+RUN pip install multiprocessing threading time 
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /Abstraction
 
 # Copy Python script or application
-COPY /app/main.py main.py
+COPY /Abstraction/main.py main.py
 
 # Command to run when the container starts
 CMD ["python", "main.py"]

@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 1.3
+- Added os. Now starting the integration
+
 ## 1.2.22
 - Quickfix from 1.2.13 to 1.2.22
 
