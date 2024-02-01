@@ -12,10 +12,10 @@ RUN \
 COPY rootfs /
 
 #----------PYTHON----------#
-FROM python:3.8-alpine
+FROM python:3.11.7-bookworm
 
 # Install dependencies
-RUN pip install multiprocessing threading time 
+#RUN pip install multiprocessing threading time 
 
 # Set the working directory
 WORKDIR /Abstraction
