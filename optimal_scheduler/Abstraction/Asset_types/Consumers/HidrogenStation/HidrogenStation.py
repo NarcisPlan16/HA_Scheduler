@@ -1,10 +1,10 @@
 # Class for the HidrogenStation consumer
 import os
 
-from Abstraction.AbsConsumer import AbsConsumer
-from Abstraction.utils.utils import createClass
-from Abstraction.Asset_types.Consumers.HidrogenStation.Electrolyzer import Electrolyzer
-from Abstraction.Asset_types.Consumers.HidrogenStation.HidrogenTank import HidrogenTank
+from AbsConsumer import AbsConsumer
+from utils.utils import createClass
+from Asset_types.Consumers.HidrogenStation.Electrolyzer import Electrolyzer
+from Asset_types.Consumers.HidrogenStation.HidrogenTank import HidrogenTank
 
 
 class HidrogenStation(AbsConsumer):

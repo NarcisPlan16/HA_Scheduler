@@ -1,6 +1,6 @@
 # Class for the wind turbines
 
-from Abstraction.Generator import Generator
+from Generator import Generator
 
 
 class WT(Generator):

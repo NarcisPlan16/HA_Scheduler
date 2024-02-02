@@ -1,7 +1,7 @@
 # Class to represent a possible solution configuration
 
 from AbsConsumer import AbsConsumer
-from Abstraction import AbsEnergySource
+from AbsEnergySource import AbsEnergySource
 
 
 class Solution:

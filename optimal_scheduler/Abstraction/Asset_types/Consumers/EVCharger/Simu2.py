@@ -1,7 +1,7 @@
 # Implementation of the class SimulateInterface for the EVCharger
 import numpy as np
 
-from Abstraction.SimulateInterface import SimulateInterface
+from SimulateInterface import SimulateInterface
 
 
 class Simu2(SimulateInterface):

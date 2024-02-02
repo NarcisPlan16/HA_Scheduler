@@ -1,8 +1,8 @@
 # EVCharger class
 import os
 
-from Abstraction.AbsConsumer import AbsConsumer
-from Abstraction.utils.utils import createClass
+from AbsConsumer import AbsConsumer
+from utils.utils import createClass
 
 
 class EVCharger(AbsConsumer):

@@ -3,24 +3,23 @@ import math
 import time
 import json
 
-import matplotlib.pyplot
 import psutil
 import copy
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import cProfile
+# import cProfile # Uncomment for debug
 import pyswarms as ps
 import pyswarms.backend.topology as ps_tp
 
-from Abstraction.Solution import Solution
-from Abstraction.AbsConsumer import AbsConsumer
-from Abstraction.Generator import Generator
-from Abstraction.AbsEnergySource import AbsEnergySource
-from Abstraction.Asset_types.Consumers.HidrogenStation.HidrogenStation import HidrogenStation
-from Abstraction.Configurator import Configurator
+from Solution import Solution
+from AbsConsumer import AbsConsumer
+from Generator import Generator
+from AbsEnergySource import AbsEnergySource
+from Asset_types.Consumers.HidrogenStation.HidrogenStation import HidrogenStation
+from Configurator import Configurator
 from scipy.optimize import differential_evolution, dual_annealing, direct, brute, Bounds
-from Abstraction.geneticalgorithm.geneticalgorithm import geneticalgorithm
+from geneticalgorithm.geneticalgorithm import geneticalgorithm
 
 
 class OptimalScheduler:
@@ -676,9 +675,10 @@ class OptimalScheduler:
         self.solucio_final = Solution(self.assets['Buildings'], self.assets['Consumers'], self.assets['EnergySources'], self.assets['Generators'])
         self.varbound = self.__configureBounds()
 
-        if self.console_debug:
-            prof = cProfile.Profile()
-            prof.enable()
+        # Uncomment for debug
+        #if self.console_debug:
+        #    prof = cProfile.Profile()
+        #    prof.enable()
 
         temps_inici = time.time()
         result = self.__optimize()
@@ -712,6 +712,47 @@ class OptimalScheduler:
         current_dir = os.getcwd()
         if self.console_debug:
             current_dir = os.path.join(current_dir, "Abstraction")
+        img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
+        fig1.savefig(img_dir, dpi=200)
+
+        plt.show()
+
+        self.mostrarResultat(temps_fi - temps_inici)
+
+    def startOptimizationNoPipe(self):
+
+        self.solucio_run = Solution(self.assets['Buildings'], self.assets['Consumers'], self.assets['EnergySources'], self.assets['Generators'])
+        self.solucio_final = Solution(self.assets['Buildings'], self.assets['Consumers'], self.assets['EnergySources'], self.assets['Generators'])
+        self.varbound = self.__configureBounds()
+
+        # Uncomment for debug
+        #if self.console_debug:
+        #    prof = cProfile.Profile()
+        #    prof.enable()
+
+        temps_inici = time.time()
+        result = self.__optimize()
+        temps_fi = time.time()
+
+        if self.console_debug:
+            prof.disable()
+            prof.print_stats(sort='cumtime')
+
+        self.solucio_final.model_variables = result.x
+        self.solucio_final.temps_tardat = temps_fi - temps_inici
+
+        x_values = range(1, len(self.progress)+1)
+        print(x_values)
+
+        plt.plot(x_values, self.progress)
+        plt.grid()
+        plt.xlabel("Iteration")
+        plt.ylabel("Cost (€)")
+        plt.title("Cost over iterations")
+
+        fig1 = plt.gcf()
+
+        current_dir = os.getcwd()
         img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
         fig1.savefig(img_dir, dpi=200)
 

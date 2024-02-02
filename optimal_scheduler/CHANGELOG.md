@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 2.0
+- OS integrated. Now working with an example, no customizability. Just to prove it works
+
 ## 1.3
 - Added os. Now starting the integration
 

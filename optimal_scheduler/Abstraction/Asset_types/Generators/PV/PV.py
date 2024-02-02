@@ -1,6 +1,6 @@
 # Photovoltaic class for photovoltaic generators
 
-from Abstraction.Generator import Generator
+from Generator import Generator
 
 
 class PV(Generator):

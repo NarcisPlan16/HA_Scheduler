@@ -1,7 +1,7 @@
 # Implementation of the class SimulateInterface for the HVac
 import numpy as np
 
-from Abstraction.SimulateInterface import SimulateInterface
+from SimulateInterface import SimulateInterface
 from datetime import datetime
 
 class Simu2(SimulateInterface):

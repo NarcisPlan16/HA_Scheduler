@@ -1,8 +1,8 @@
 # Simulation type number 1 of the Thermal Storage
 
-from Abstraction.SimulateInterface import SimulateInterface
-from Abstraction.Asset_types.Consumers.ThermalStorage import HeatPump
-from Abstraction.Asset_types.Consumers.ThermalStorage import HeatTank
+from SimulateInterface import SimulateInterface
+from Asset_types.Consumers.ThermalStorage import HeatPump
+from Asset_types.Consumers.ThermalStorage import HeatTank
 
 
 class Simu1(SimulateInterface):

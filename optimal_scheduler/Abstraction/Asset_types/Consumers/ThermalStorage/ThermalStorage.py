@@ -2,10 +2,10 @@
 import os
 
 from datetime import datetime
-from Abstraction.AbsConsumer import AbsConsumer
-from Abstraction.Asset_types.Consumers.ThermalStorage.HeatPump import HeatPump
-from Abstraction.Asset_types.Consumers.ThermalStorage.HeatTank import HeatTank
-from Abstraction.utils.utils import createClass
+from AbsConsumer import AbsConsumer
+from Asset_types.Consumers.ThermalStorage.HeatPump import HeatPump
+from Asset_types.Consumers.ThermalStorage.HeatTank import HeatTank
+from utils.utils import createClass
 
 
 class ThermalStorage(AbsConsumer):

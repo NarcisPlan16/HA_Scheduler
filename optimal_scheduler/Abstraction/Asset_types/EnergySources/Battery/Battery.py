@@ -1,8 +1,8 @@
 # Generic class for all types of battery
 import os
 
-from Abstraction.AbsEnergySource import AbsEnergySource
-from Abstraction.utils.utils import createClass
+from AbsEnergySource import AbsEnergySource
+from utils.utils import createClass
 
 
 class Battery(AbsEnergySource):

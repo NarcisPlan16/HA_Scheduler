@@ -1,6 +1,6 @@
 # Implementation of the class SimulateInterface for the EVCharger
 
-from Abstraction.SimulateInterface import SimulateInterface
+from SimulateInterface import SimulateInterface
 
 
 class Simu1(SimulateInterface):

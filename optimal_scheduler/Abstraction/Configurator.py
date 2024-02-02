@@ -14,7 +14,7 @@ sys.path.append(subfolder_dir)
 subfolder_dir = os.path.join(parent_dir, 'Asset_types')
 sys.path.append(subfolder_dir)
 
-from .utils import utils
+from utils import utils
 
 
 class Configurator:

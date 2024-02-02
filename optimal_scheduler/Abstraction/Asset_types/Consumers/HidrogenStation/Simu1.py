@@ -4,9 +4,9 @@
 # Té en compte que hi poden haver molts tanks i molts electrolyzers. El qeu fa és calcular per cada hora quant
 # generen tots els electrolyzers i ho reparteix per igual a tots els tanks.
 
-from Abstraction.SimulateInterface import SimulateInterface
-from Abstraction.Asset_types.Consumers.HidrogenStation.Electrolyzer import Electrolyzer
-from Abstraction.Asset_types.Consumers.HidrogenStation.HidrogenTank import HidrogenTank
+from SimulateInterface import SimulateInterface
+from Asset_types.Consumers.HidrogenStation.Electrolyzer import Electrolyzer
+from Asset_types.Consumers.HidrogenStation.HidrogenTank import HidrogenTank
 
 
 class Simu1(SimulateInterface):

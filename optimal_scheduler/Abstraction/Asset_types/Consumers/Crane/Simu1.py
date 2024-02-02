@@ -2,7 +2,7 @@
 
 import math
 
-from Abstraction.SimulateInterface import SimulateInterface
+from SimulateInterface import SimulateInterface
 
 
 class Simu1(SimulateInterface):
