@@ -684,9 +684,9 @@ class OptimalScheduler:
         result = self.__optimize()
         temps_fi = time.time()
 
-        if self.console_debug:
-            prof.disable()
-            prof.print_stats(sort='cumtime')
+        #if self.console_debug:
+        #    prof.disable()
+        #    prof.print_stats(sort='cumtime')
 
         self.solucio_final.model_variables = result.x
         self.solucio_final.temps_tardat = temps_fi - temps_inici
@@ -713,6 +713,7 @@ class OptimalScheduler:
         if self.console_debug:
             current_dir = os.path.join(current_dir, "Abstraction")
         img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
+        os.makedirs("result_imgs", exist_ok=True)
         fig1.savefig(img_dir, dpi=200)
 
         plt.show()
@@ -734,9 +735,9 @@ class OptimalScheduler:
         result = self.__optimize()
         temps_fi = time.time()
 
-        if self.console_debug:
-            prof.disable()
-            prof.print_stats(sort='cumtime')
+        #if self.console_debug:
+        #    prof.disable()
+        #    prof.print_stats(sort='cumtime')
 
         self.solucio_final.model_variables = result.x
         self.solucio_final.temps_tardat = temps_fi - temps_inici
@@ -752,9 +753,13 @@ class OptimalScheduler:
 
         fig1 = plt.gcf()
 
-        current_dir = os.getcwd()
-        img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
-        fig1.savefig(img_dir, dpi=200)
+        #current_dir = os.getcwd()
+        #if self.console_debug:
+        #    current_dir = os.path.join(current_dir, "Abstraction")
+        #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
+
+        os.makedirs("result_imgs", exist_ok=True)
+        fig1.savefig("result_imgs/cost.png", dpi=200, )
 
         plt.show()
 
