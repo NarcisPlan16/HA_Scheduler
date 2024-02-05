@@ -15,7 +15,8 @@ COPY rootfs /
 FROM python:3.11.7-bookworm
 
 # Install dependencies
-RUN pip install matplotlib psutil pyswarms func_timeout customtkinter
+RUN pip install psutil pyswarms func_timeout customtkinter 
+# matplotlib
 
 # Copy Python script or application
 COPY /Abstraction Abstraction

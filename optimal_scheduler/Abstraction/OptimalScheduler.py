@@ -7,7 +7,7 @@ import psutil
 import copy
 import os
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 # import cProfile # Uncomment for debug
 import pyswarms as ps
 import pyswarms.backend.topology as ps_tp
@@ -701,22 +701,22 @@ class OptimalScheduler:
         x_values = range(1, len(self.progress)+1)
         print(x_values)
 
-        plt.plot(x_values, self.progress)
-        plt.grid()
-        plt.xlabel("Iteration")
-        plt.ylabel("Cost (€)")
-        plt.title("Cost over iterations")
+        #plt.plot(x_values, self.progress)
+        #plt.grid()
+        #plt.xlabel("Iteration")
+        #plt.ylabel("Cost (€)")
+        #plt.title("Cost over iterations")
 
-        fig1 = plt.gcf()
+        #fig1 = plt.gcf()
 
-        current_dir = os.getcwd()
+        #current_dir = os.getcwd()
         #if self.console_debug:
         #    current_dir = os.path.join(current_dir, "Abstraction")
-        img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
-        os.makedirs("result_imgs", exist_ok=True)
-        fig1.savefig(img_dir, dpi=200)
+        #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
+        #os.makedirs("result_imgs", exist_ok=True)
+        #fig1.savefig(img_dir, dpi=200)
 
-        plt.show()
+        #plt.show()
 
         self.mostrarResultat(temps_fi - temps_inici)
 
@@ -745,23 +745,23 @@ class OptimalScheduler:
         x_values = range(1, len(self.progress)+1)
         print(x_values)
 
-        plt.plot(x_values, self.progress)
-        plt.grid()
-        plt.xlabel("Iteration")
-        plt.ylabel("Cost (€)")
-        plt.title("Cost over iterations")
+        #plt.plot(x_values, self.progress)
+        #plt.grid()
+        #plt.xlabel("Iteration")
+        #plt.ylabel("Cost (€)")
+        #plt.title("Cost over iterations")
 
-        fig1 = plt.gcf()
+        #fig1 = plt.gcf()
 
         #current_dir = os.getcwd()
         #if self.console_debug:
         #    current_dir = os.path.join(current_dir, "Abstraction")
         #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
 
-        os.makedirs("result_imgs", exist_ok=True)
-        fig1.savefig("result_imgs/cost.png", dpi=200, )
+        #os.makedirs("result_imgs", exist_ok=True)
+        #fig1.savefig("result_imgs/cost.png", dpi=200, )
 
-        plt.show()
+        #plt.show()
 
         self.mostrarResultat(temps_fi - temps_inici)
 
