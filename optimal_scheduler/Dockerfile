@@ -13,7 +13,8 @@ COPY rootfs /
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        gcc
+        gcc \
+        gfortran
 
 #----------PYTHON----------#
 FROM python:3.11.7-bookworm
