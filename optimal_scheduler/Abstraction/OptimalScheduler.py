@@ -710,8 +710,8 @@ class OptimalScheduler:
         fig1 = plt.gcf()
 
         current_dir = os.getcwd()
-        if self.console_debug:
-            current_dir = os.path.join(current_dir, "Abstraction")
+        #if self.console_debug:
+        #    current_dir = os.path.join(current_dir, "Abstraction")
         img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
         os.makedirs("result_imgs", exist_ok=True)
         fig1.savefig(img_dir, dpi=200)
