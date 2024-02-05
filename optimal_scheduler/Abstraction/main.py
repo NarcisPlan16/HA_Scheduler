@@ -4,8 +4,6 @@ import time
 import json
 
 import OptimalScheduler as optimalscheduler
-from Application import Application
-
 
 def backgroundSimulation(gui, os):
 
@@ -58,12 +56,6 @@ if __name__ == "__main__":
     t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
     t2.start()
 
-    #app = Application(scheduler, event)
-
-    #check_loop = threading.Thread(target=checkloop, args=(event,))
-    #check_loop.start()
-
-    #app.mainloop()
 
 
 

@@ -1,5 +1,8 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 2.3
+- Removed tkinter and Application as they are GUI-App related
+
 ## 2.2
 - Removed (commented) matplotlib as it is causing errors with the guithub actions architecture builds
 
