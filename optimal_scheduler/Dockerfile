@@ -12,8 +12,7 @@ RUN \
 COPY rootfs /
 
 #----------PYTHON----------#
-#FROM python:3.11.7-bookworm
-FROM python:3.10-bookworm
+FROM python:3.11.7-bookworm
 
 # Install dependencies
 RUN pip install matplotlib psutil pyswarms func_timeout customtkinter
