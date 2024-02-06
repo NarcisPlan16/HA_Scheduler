@@ -11,10 +11,13 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        gcc \
-        gfortran
+#####################################################
+# TODO: Fix github action build architecture failure
+#RUN apt-get update \
+#    && apt-get install -y --no-install-recommends \
+#        gcc \
+#        gfortran
+#####################################################
 
 #----------PYTHON----------#
 FROM python:3.11.7-bookworm

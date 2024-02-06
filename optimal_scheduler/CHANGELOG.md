@@ -1,5 +1,7 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 2.4
+- Started options integration
 ## 2.3
 - Removed tkinter and Application as they are GUI-App related
 

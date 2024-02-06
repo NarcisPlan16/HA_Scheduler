@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "2.3"
+version: "2.4"
 slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
@@ -15,8 +15,11 @@ map:
   - share:rw
 options:
   message: "Hello world..."
-  Toggle_something: true
+  Toggle something: true
+  Toggle something else: false
+
 schema:
   message: "str?"
-  Toggle_something: bool
+  Toggle something: bool
+  Toggle something else: bool
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
