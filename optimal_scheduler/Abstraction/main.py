@@ -2,8 +2,14 @@ import multiprocessing
 import threading
 import time
 import json
+import requests
 
 import OptimalScheduler as optimalscheduler
+
+# URL for the Home Assistant API
+# TODO: WORK WITH .secrets
+api_url = "http://192.168.0.117:8123/api/"
+access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiOWUzNjU4NWVkMzI0YzYxYWFlYTdhMmZiZTkyNGY0MCIsImlhdCI6MTcwNzMwMjM1OCwiZXhwIjoyMDIyNjYyMzU4fQ.d-brZLxCDdcUtuf5XpOjWjCBd-q4gPBgc18B7skr6z8"
 
 def backgroundSimulation(gui, os):
 
@@ -32,7 +38,7 @@ def importConfiguration():
         #files = [('Json Files', '*.json')]
         #file = fd.askopenfile(filetypes=files, initialdir=save_dir, defaultextension="json")
 
-        file = open("SavedOSConfigs/walqa.json")
+        file = open("/Abstraction/SavedOSConfigs/walqa.json")
 
         config = json.load(file)
         scheduler.deleteAssets()
@@ -43,7 +49,34 @@ def importConfiguration():
 
                     scheduler.addAsset(asset_type, asset_class, asset)
 
-        
+
+def read_options():
+    
+    # Headers for API request
+    headers = {
+        #"Authorization": f"Bearer {access_token}"
+        "Bearer Token": access_token,
+        "Content-Type": "application/json"
+    }
+
+    # Send GET request to fetch options
+    response = requests.get(api_url+"config/options", headers=headers)
+    
+    if response.status_code == 200:
+        options = response.json()["data"]
+
+        # Access the options
+        message = options.get("message", "Default message")
+        toggle_something = options.get("Toggle something", False)
+        toggle_something_else = options.get("Toggle something else", False)
+
+        # Now you can use these options as needed
+        print("Message:", message)
+        print("Toggle something:", toggle_something)
+        print("Toggle something else:", toggle_something_else)
+    else:
+        print("Error fetching options:", response.text)
+
 
 if __name__ == "__main__":
 
@@ -54,7 +87,10 @@ if __name__ == "__main__":
 
     write_pipe = multiprocessing.Pipe()
     t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
-    t2.start()
+    #t2.start()
+
+    read_options()
+
 
 
 

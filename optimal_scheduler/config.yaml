@@ -22,4 +22,5 @@ schema:
   message: "str?"
   Toggle something: bool
   Toggle something else: bool
+  
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
