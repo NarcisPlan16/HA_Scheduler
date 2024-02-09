@@ -11,6 +11,11 @@ arch:
   - amd64
   - i386
 init: false
+# Try to solve supervisor token
+homeassistant_api: true
+hassio_api: true
+hassio_role: default
+###############
 map:
   - share:rw
 options:

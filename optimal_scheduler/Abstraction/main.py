@@ -8,7 +8,7 @@ import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-api_url = "http://192.168.0.117:8123/api/"
+api_url = "http://192.168.1.192:8123/api/"
 access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiOWUzNjU4NWVkMzI0YzYxYWFlYTdhMmZiZTkyNGY0MCIsImlhdCI6MTcwNzMwMjM1OCwiZXhwIjoyMDIyNjYyMzU4fQ.d-brZLxCDdcUtuf5XpOjWjCBd-q4gPBgc18B7skr6z8"
 
 def backgroundSimulation(gui, os):
@@ -55,12 +55,13 @@ def read_options():
     # Headers for API request
     headers = {
         #"Authorization": f"Bearer {access_token}"
-        "Bearer Token": access_token,
+        #"Bearer Token": access_token,
         "Content-Type": "application/json"
     }
 
     # Send GET request to fetch options
-    response = requests.get(api_url+"config/options", headers=headers)
+    response = requests.get(api_url+"/api/config/", headers=headers)
+    print(response)
     
     if response.status_code == 200:
         options = response.json()["data"]
