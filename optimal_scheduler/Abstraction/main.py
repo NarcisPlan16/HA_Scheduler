@@ -3,6 +3,8 @@ import threading
 import time
 import json
 import requests
+import os
+from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
 
@@ -54,16 +56,28 @@ def read_options():
     
     # Headers for API request
     headers = {
-        #"Authorization": f"Bearer {access_token}"
+        "Authorization": f"Bearer {access_token}",
         #"Bearer Token": access_token,
         "Content-Type": "application/json"
     }
 
+    #OPTIONS_PATH = os.getenv('OPTIONS_PATH', default="/data/options.json")
+    #options_json = Path(OPTIONS_PATH)
+
+    # Read options info
+    #if options_json.exists():
+    #    with options_json.open('r') as data:
+    #        options = json.load(data)
+        #print(options)
+    #else:
+    #   print("options.json does not exist")
+
     # Send GET request to fetch options
-    response = requests.get(api_url+"/api/config/", headers=headers)
-    print(response)
-    
+    response = requests.get(api_url+"/config/", headers=headers)
+    print(response.text)
+
     if response.status_code == 200:
+        print(response.json())
         options = response.json()["data"]
 
         # Access the options
