@@ -11,8 +11,12 @@ arch:
   - amd64
   - i386
 init: false
-# Try to solve supervisor token
+boot: manual
+# Try to solve api issues
 homeassistant_api: true
+#ingress: true
+#ingress_port: 0
+auth_api: true
 hassio_api: true
 hassio_role: default
 ###############
