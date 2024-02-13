@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     #read_options()
 
-    file = open("/addon_configs/optimal_scheduler.yaml")
+    file = open("/addon_configs/local_optimal_scheduler/optimal_scheduler.yaml")
     config = yaml.safe_load(file)
     print(config)
 
