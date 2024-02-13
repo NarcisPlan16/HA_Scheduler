@@ -11,6 +11,7 @@ arch:
   - amd64
   - i386
 init: false
+apparmor: true
 boot: manual
 # Try to solve api issues
 homeassistant_api: true
@@ -18,10 +19,14 @@ homeassistant_api: true
 #ingress_port: 0
 auth_api: true
 hassio_api: true
-hassio_role: default
+hassio_role: homeassistant #default
+roles:
+  - homeassistant
 ###############
 map:
   - share:rw
+  - addon_config:rw
+  - addons:r
 options:
   message: "Hello world..."
   Toggle something: true

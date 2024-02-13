@@ -5,6 +5,7 @@ import json
 import requests
 import logging
 import os
+import yaml
 from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
@@ -58,7 +59,7 @@ def read_options():
     # Headers for API request
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {bearer_token}"
+        "Authorization": f"Bearer {os.environ['SUPERVISOR_TOKEN']}"
     }
 
     #OPTIONS_PATH = os.getenv('OPTIONS_PATH', default="/data/options.json")
@@ -73,7 +74,7 @@ def read_options():
     #   print("options.json does not exist")
 
     # Send GET request to fetch options
-    response = requests.get(url=api_url+"/config", headers=headers) # "http://supervisor/core/api" retorna 403
+    response = requests.get(url="http://supervisor/"+"addons/self", headers=headers) #"http://supervisor/"
     print(response.text)
 
     if response.status_code == 200:
@@ -104,9 +105,11 @@ if __name__ == "__main__":
     t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
     #t2.start()
 
-    read_options()
+    #read_options()
 
-
+    file = open("/addon_configs/optimal_scheduler.yaml")
+    config = yaml.safe_load(file)
+    print(config)
 
 
 
