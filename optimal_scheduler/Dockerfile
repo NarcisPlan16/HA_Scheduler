@@ -29,9 +29,13 @@ RUN pip install psutil pyswarms func_timeout requests
 # Copy Python script or application
 COPY /Abstraction Abstraction
 COPY config.yaml config.yaml
+COPY run.sh run.sh
+
+CMD ["ls", "-l"]
 
 # Set the working directory
 #WORKDIR /Abstraction
 
 # Command to run when the container starts
-CMD ["python", "Abstraction/main.py"]
+#CMD ["python", "Abstraction/main.py"]
+RUN run.sh

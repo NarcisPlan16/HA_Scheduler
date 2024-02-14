@@ -3,10 +3,10 @@ import threading
 import time
 import json
 import requests
-import logging
+import subprocess
 import os
 import yaml
-from pathlib import Path
+#from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
 
@@ -107,9 +107,18 @@ if __name__ == "__main__":
 
     #read_options()
 
-    file = open("/addon_configs/local_optimal_scheduler/optimal_scheduler.yaml")
-    config = yaml.safe_load(file)
-    print(config)
+    #file = open("/addon_configs/local_optimal_scheduler/optimal_scheduler.yaml")
+    #config = yaml.safe_load(file)
+
+
+    ## Get the 'message' key from the user config options.
+    # Execute the command and capture its output
+    message = os.environ.get('message') # subprocess.check_output(['bash', '-c', "bashio::config 'message'"]) 
+
+    # Decode the output from bytes to string
+    #message = message.decode('utf-8').strip()
+
+    print(message)
 
 
 
