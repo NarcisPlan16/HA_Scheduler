@@ -1,5 +1,4 @@
 #!/usr/bin/with-contenv bashio
-#!/bin/sh
 
 # ==============================================================================
 # Start the example service
@@ -19,4 +18,4 @@ bashio::log.info "${message:="Hello World..."}"
 
 ## Run your program
 #exec /usr/bin/my_program
-python Abstraction/main.py
+#python Abstraction/main.py
