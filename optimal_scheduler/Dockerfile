@@ -31,11 +31,11 @@ COPY /Abstraction Abstraction
 COPY config.yaml config.yaml
 COPY run.sh run.sh
 
-CMD ["ls", "-l"]
+RUN chmod +x run.sh
 
 # Set the working directory
 #WORKDIR /Abstraction
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]
-RUN run.sh
+CMD run.sh
