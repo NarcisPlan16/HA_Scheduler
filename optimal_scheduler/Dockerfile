@@ -37,5 +37,6 @@ RUN chmod +x run.sh
 #WORKDIR /Abstraction
 
 # Command to run when the container starts
-#CMD ["python", "Abstraction/main.py"]
-CMD run.sh
+#CMD ["python", "Abstraction/main.py"] 
+#CMD ["/bin/ls", "-l"] 
+CMD ["run.sh"]
