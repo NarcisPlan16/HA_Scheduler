@@ -36,5 +36,9 @@ schema:
   message: "str?"
   Toggle something: bool
   Toggle something else: bool
+
+args:
+  BASHIO_VERSION: 0.16.2
+  TEMPIO_VERSION: 2021.09.0
   
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
