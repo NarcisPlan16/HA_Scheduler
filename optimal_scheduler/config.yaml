@@ -40,5 +40,6 @@ schema:
 args:
   BASHIO_VERSION: 0.16.2
   TEMPIO_VERSION: 2021.09.0
+  BUILD_FROM: home-assistant/docker-base:bookworm
   
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
