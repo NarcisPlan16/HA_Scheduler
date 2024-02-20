@@ -7,7 +7,6 @@
 #
 # Add your code here
 #
-From /data/options.json
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 ## Print the message the user supplied, defaults to "Hello World..."
