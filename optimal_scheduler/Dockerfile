@@ -5,6 +5,9 @@ FROM ghcr.io/home-assistant/armhf-base-raspbian:latest
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+RUN apt-get update && \
+    apt-get -y install sudo
+
 # Copy root filesystem
 COPY rootfs /
 
@@ -27,14 +30,19 @@ RUN pip install psutil pyswarms func_timeout requests
 COPY /Abstraction Abstraction
 COPY config.yaml config.yaml
 COPY run.sh run.sh
+COPY findBashio.sh findBashio.sh
 
-RUN chmod +x run.sh
+RUN chmod 777 run.sh
+RUN chmod 777 findBashio.sh
+
+RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo
+
+USER docker
 
 # Set the working directory
 #WORKDIR /usr/local/bin
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"] 
-#CMD ["/bin/ls", "-l"] 
-#RUN ["bash", "-c", "ls -l /bin/lib | grep bashio"]
-CMD ["sh", "./run.sh"]
+#CMD ["sh", "./run.sh"]
+CMD ["sh", "./findBashio.sh"]
