@@ -57,4 +57,4 @@ RUN chmod 777 findBashio.sh
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]
 #CMD ["sh", "./run.sh"]
-CMD ["sh", "./findBashio.sh"]
+#CMD ["sh", "./findBashio.sh"]
