@@ -1,4 +1,6 @@
 #!/usr/bin/env bashio
 
-message=$(bashio::config 'message')
-bashio::log.info "${message:="Hello World..."}"
+CONFIG_PATH=/data/options.json
+
+message="$(bashio::config 'message')"
+#bashio::log.info "${message:="Hello World..."}"
