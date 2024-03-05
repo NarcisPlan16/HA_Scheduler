@@ -3,7 +3,7 @@
 #FROM ghcr.io/home-assistant/armhf-base-raspbian:latest
 #FROM ghcr.io/home-assistant/armhf-base-python:latest
 #FROM ghcr.io/home-assistant/armhf-base-debian:latest
-FROM ghcr.io/home-assistant/armv7-base-debian:latest
+FROM ghcr.io/home-assistant/aarch64-base-debian:latest
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -23,13 +23,25 @@ COPY rootfs /
 # python:3.11.7-bookworm
 RUN apt update && apt upgrade -y
 RUN apt install -y curl bzip2
-RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-armv7l.sh
-RUN bash Miniconda3-latest-Linux-armv7l.sh -b
-RUN exec $SHELL
+RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+RUN bash Miniconda3-latest-Linux-aarch64.sh -b -p /opt/conda
+RUN rm Miniconda3-latest-Linux-aarch64.sh  # Clean up the installer
+#RUN exec $SHELL
 
-# Install dependencies
-RUN conda install --yes psutil pyswarms func_timeout requests
-# matplotlib
+ENV PATH="/opt/conda/bin:${PATH}"
+
+# Create a new conda environment
+RUN conda create -n myenv python
+
+# Activate the new environment
+SHELL ["conda", "run", "-n", "myenv", "/bin/bash", "-c"]
+
+# Install Python libraries
+RUN conda install -y psutil func_timeout requests
+RUN conda install -y conda-forge::pyswarms
+
+# Switch back to the default shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Copy Python script or application
 COPY /Abstraction Abstraction
