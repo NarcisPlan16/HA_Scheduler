@@ -1,7 +1,9 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 
 #FROM ghcr.io/home-assistant/armhf-base-raspbian:latest
-FROM ghcr.io/hassio-addons/addon-base-python:latest
+#FROM ghcr.io/home-assistant/armhf-base-python:latest
+#FROM ghcr.io/home-assistant/armhf-base-debian:latest
+FROM ghcr.io/home-assistant/armv7-base-debian:latest
 
 # Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -18,10 +20,15 @@ COPY rootfs /
 #####################################################
 
 #----------PYTHON----------#
-#FROM python:3.11.7-bookworm
+# python:3.11.7-bookworm
+RUN apt update && apt upgrade -y
+RUN apt install -y curl bzip2
+RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-armv7l.sh
+RUN bash Miniconda3-latest-Linux-armv7l.sh -b
+RUN exec $SHELL
 
 # Install dependencies
-RUN pip install psutil pyswarms func_timeout requests
+RUN conda install --yes psutil pyswarms func_timeout requests
 # matplotlib
 
 # Copy Python script or application
