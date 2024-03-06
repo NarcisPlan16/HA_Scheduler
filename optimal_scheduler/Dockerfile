@@ -22,12 +22,16 @@ COPY rootfs /
 #----------PYTHON----------#
 # python:3.11.7-bookworm
 RUN apt update && apt upgrade -y
-RUN apt install -y curl bzip2
-RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
-RUN bash Miniconda3-latest-Linux-aarch64.sh -b -p /opt/conda
-RUN rm Miniconda3-latest-Linux-aarch64.sh  # Clean up the installer
-#RUN exec $SHELL
+RUN apt install -y curl bzip2 sudo
+#RUN curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+#RUN chmod +x Miniconda3-latest-Linux-aarch64.sh
+#RUN bash Miniconda3-latest-Linux-aarch64.sh -b -p /opt/conda
+#RUN rm Miniconda3-latest-Linux-aarch64.sh  # Clean up the installer
 
+#ENV PATH="/opt/conda/bin:${PATH}"
+
+RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+RUN bash Miniforge3-$(uname)-$(uname -m).sh -b -p /opt/conda
 ENV PATH="/opt/conda/bin:${PATH}"
 
 # Create a new conda environment
