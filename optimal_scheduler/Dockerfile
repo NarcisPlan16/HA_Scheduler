@@ -14,13 +14,6 @@ RUN pip install psutil func_timeout requests
 # Copy Python script or application
 COPY /Abstraction Abstraction
 COPY config.yaml config.yaml
-COPY run.sh run.sh
-COPY findBashio.sh findBashio.sh
-
-RUN chmod 777 run.sh
-RUN chmod 777 findBashio.sh
-
-RUN echo $PATH
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]
