@@ -2,18 +2,20 @@
 
 FROM ghcr.io/home-assistant/aarch64-base-python:latest
 
-#ENV PATH="${PATH}:/usr/bin/bashio"
 ENV PATH="${PATH}:/usr/lib/bashio"
+#ENV PATH="${PATH}:/usr/python"
 
 # Copy root filesystem
 COPY rootfs /
+COPY config.yaml config.yaml
+
+RUN chmod +x rootfs/usr/bin/Abstraction/main.py
 
 RUN pip install psutil func_timeout requests 
 #pyswarms
 
 # Copy Python script or application
-COPY /Abstraction Abstraction
-COPY config.yaml config.yaml
+#COPY /Abstraction Abstraction
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]

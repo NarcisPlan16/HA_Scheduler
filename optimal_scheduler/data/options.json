@@ -1,1 +1,2 @@
-{ "message": "hol up" }
+{ "message": "hol up",
+  "Toggle_something" : true }

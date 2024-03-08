@@ -1,7 +1,10 @@
+#!/usr/bin/python
+
 import multiprocessing
 import threading
 import time
 import json
+import sys
 import requests
 import subprocess
 import os
@@ -106,6 +109,7 @@ if __name__ == "__main__":
     #t2.start()
 
     #read_options()
+    message = str(sys.argv[1])
 
     #file = open("/addon_configs/local_optimal_scheduler/optimal_scheduler.yaml")
     #config = yaml.safe_load(file)
@@ -113,7 +117,7 @@ if __name__ == "__main__":
 
     ## Get the 'message' key from the user config options.
     # Execute the command and capture its output
-    message = os.environ.get('message') # subprocess.check_output(['bash', '-c', "bashio::config 'message'"]) 
+    #message = os.environ.get('message') # subprocess.check_output(['bash', '-c', "bashio::config 'message'"]) 
 
     # Decode the output from bytes to string
     #message = message.decode('utf-8').strip()
