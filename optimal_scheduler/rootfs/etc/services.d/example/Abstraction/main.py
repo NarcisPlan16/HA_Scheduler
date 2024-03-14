@@ -102,10 +102,10 @@ if __name__ == "__main__":
     #event = threading.Event()
     scheduler = optimalscheduler.OptimalScheduler()
 
-    importConfiguration()
+    #importConfiguration()
 
-    write_pipe = multiprocessing.Pipe()
-    t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
+    #write_pipe = multiprocessing.Pipe()
+    #t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
     #t2.start()
 
     #read_options()
