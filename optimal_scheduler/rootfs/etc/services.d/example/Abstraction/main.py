@@ -6,9 +6,8 @@ import time
 import json
 import sys
 import requests
-import subprocess
 import os
-import yaml
+import subprocess
 #from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
@@ -33,7 +32,7 @@ def checkloop(event: threading.Event):
     while True:
 
         event.wait()
-        backgroundSimulation(app, scheduler)
+        #backgroundSimulation(app, scheduler)
 
         time.sleep(2)
 
@@ -45,6 +44,7 @@ def importConfiguration():
         #files = [('Json Files', '*.json')]
         #file = fd.askopenfile(filetypes=files, initialdir=save_dir, defaultextension="json")
 
+        subprocess.run(["ls", "-l", "Abstraction"])
         file = open("/Abstraction/SavedOSConfigs/walqa.json")
 
         config = json.load(file)

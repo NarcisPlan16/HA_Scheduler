@@ -7,17 +7,17 @@ ENV PATH="${PATH}:/usr/lib/bashio"
 
 # Copy root filesystem
 COPY rootfs /
+#RUN find . -type d -name "Abstraction" -print &> out.txt
+
+#RUN chmod 777 ./etc/services.d/example/Abstraction/SavedOSConfigs
+#RUN chmod 777 ./etc/services.d/example/Abstraction
+RUN dos2unix ./etc/services.d/example/Abstraction/*.py
+
 COPY config.yaml config.yaml
 
-RUN chmod +x rootfs/usr/bin/Abstraction/main.py
-
-RUN pip install psutil func_timeout requests 
-#pyswarms
-
-# Copy Python script or application
-#COPY /Abstraction Abstraction
+RUN pip install psutil func_timeout requests numpy 
+# scipy pyswarms
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]
 #CMD ["sh", "./run.sh"]
-#CMD ["sh", "./findBashio.sh"]

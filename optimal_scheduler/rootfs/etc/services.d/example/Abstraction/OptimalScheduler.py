@@ -9,8 +9,8 @@ import os
 import numpy as np
 #import matplotlib.pyplot as plt
 # import cProfile # Uncomment for debug
-import pyswarms as ps
-import pyswarms.backend.topology as ps_tp
+#import pyswarms as ps
+#import pyswarms.backend.topology as ps_tp
 
 from Solution import Solution
 from AbsConsumer import AbsConsumer
@@ -18,7 +18,7 @@ from Generator import Generator
 from AbsEnergySource import AbsEnergySource
 from Asset_types.Consumers.HidrogenStation.HidrogenStation import HidrogenStation
 from Configurator import Configurator
-from scipy.optimize import differential_evolution, dual_annealing, direct, brute, Bounds
+#from scipy.optimize import differential_evolution, dual_annealing, direct, brute, Bounds
 from geneticalgorithm.geneticalgorithm import geneticalgorithm
 
 
@@ -68,7 +68,7 @@ class OptimalScheduler:
         """
 
         # DE
-        resultat = self.__runDEModel(self.costDE)
+        #resultat = self.__runDEModel(self.costDE)
 
         # PSO
         #resultat = self.__runPSOModel(self.costPSO)
@@ -80,14 +80,15 @@ class OptimalScheduler:
         #resultat = self.__runDIRECTModel(self.costSA)
 
         # GA
-        # model = self.__initializeGAModel(96, self.costDE, self.varbound)
-        # resultat = self.__runGAModel(model)
+        model = self.__initializeGAModel(96, self.costDE, self.varbound)
+        resultat = self.__runGAModel(model)
 
         # Retornem la configuracio de les variables del model
         return resultat
 
     def __runDIRECTModel(self, function):
 
+        """
         lb = []
         ub = []
         for element in self.varbound:
@@ -102,7 +103,9 @@ class OptimalScheduler:
                      maxiter=500,
                      locally_biased=False)
 
-        return res
+        """
+
+        return #res
 
     def __updateDIRECTStep(self, cost):
 
@@ -110,15 +113,15 @@ class OptimalScheduler:
 
     def __runSAModel(self, function):
 
+        """
         res = dual_annealing(func=function,
                              bounds=self.varbound,
                              maxiter=500,
                              no_local_search=True,
                              callback=self.__updateSAStep)
 
-        print("fora")
-
-        return res
+        """
+        return #res
 
     def __updateSAStep(self, config, cost, context):
 
@@ -138,22 +141,22 @@ class OptimalScheduler:
             ub.append(element[1])
 
         # Call instance of GlobalBestPSO
-        optimizer = ps.single.GlobalBestPSO(n_particles=800,
-                                            dimensions=len(self.varbound),
-                                            bounds=[lb, ub],
-                                            options=options)
+        #optimizer = ps.single.GlobalBestPSO(n_particles=800,
+        #                                    dimensions=len(self.varbound),
+        #                                    bounds=[lb, ub],
+        #                                    options=options)
 
         # Perform optimization
-        cost, config = optimizer.optimize(function,
-                                          iters=500,
-                                          n_processes=6,
-                                          verbose=True)
+        #cost, config = optimizer.optimize(function,
+        #                                  iters=500,
+        #                                  n_processes=6,
+        #                                  verbose=True)
 
-        resultat = self.Result(config)
-        cost = function([config])
-        self.solucio_final = copy.deepcopy(self.solucio_run)
+        #resultat = self.Result(config)
+        #cost = function([config])
+        #self.solucio_final = copy.deepcopy(self.solucio_run)
 
-        return resultat
+        return #resultat
 
     def __runGAModel(self, model):
 
@@ -234,6 +237,7 @@ class OptimalScheduler:
         # funcio que retorna el resultat de simular amb el model de differential evolution
 
         # Si peta al iniciar i diu que no ha trobat solució vàlida, pot ser que no hi hagi un popsize prou gran
+        """
         result = differential_evolution(func=function,
                                         popsize=150,  # 160
                                         bounds=self.varbound,
@@ -253,8 +257,8 @@ class OptimalScheduler:
         print("Total evaluations: ", result['nfev'])
         print("Solution: ", result['x'])
         print("Cost: ", result['fun'])
-
-        return result  # retornem la solucio (configuracio de vbounds)
+        """
+        return #result  # retornem la solucio (configuracio de vbounds)
 
     def __obtainHidrogenStationInfo(self):
 
