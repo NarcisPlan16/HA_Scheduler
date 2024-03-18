@@ -7,16 +7,15 @@ ENV PATH="${PATH}:/usr/lib/bashio"
 
 # Copy root filesystem
 COPY rootfs /
-#RUN find . -type d -name "Abstraction" -print &> out.txt
 
-#RUN chmod 777 ./etc/services.d/example/Abstraction/SavedOSConfigs
-#RUN chmod 777 ./etc/services.d/example/Abstraction
 RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
 COPY config.yaml config.yaml
 
-RUN pip install psutil func_timeout requests numpy 
-# scipy pyswarms
+RUN pip install psutil func_timeout requests numpy homeassistant_api
+# homeassistant
+# homeassistant_api
+#CAUSE PROBLEMS: scipy pyswarms
 
 # Command to run when the container starts
 #CMD ["python", "Abstraction/main.py"]

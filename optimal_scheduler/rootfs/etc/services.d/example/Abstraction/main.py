@@ -10,12 +10,15 @@ import os
 import subprocess
 #from pathlib import Path
 
+from homeassistant_api import Client
+
 import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-api_url = "http://192.168.0.117:8123/api/"
+ha_url = "http://192.168.1.192:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiOWUzNjU4NWVkMzI0YzYxYWFlYTdhMmZiZTkyNGY0MCIsImlhdCI6MTcwNzMwMjM1OCwiZXhwIjoyMDIyNjYyMzU4fQ.d-brZLxCDdcUtuf5XpOjWjCBd-q4gPBgc18B7skr6z8"
+ha = Client(ha_url, bearer_token) # Connect to Home Assistant instance
 
 def backgroundSimulation(gui, os):
 
@@ -38,63 +41,17 @@ def checkloop(event: threading.Event):
 
 def importConfiguration():
 
-        #current_dir = os.getcwd()
-        #save_dir = os.path.join(current_dir, "SavedOSConfigs")
+    config = read_options()
 
-        #files = [('Json Files', '*.json')]
-        #file = fd.askopenfile(filetypes=files, initialdir=save_dir, defaultextension="json")
+    for asset_type in config:
+        for asset_class in config[asset_type]:
+            for asset in config[asset_type][asset_class].values():
 
-        subprocess.run(["ls", "-l", "Abstraction"])
-        file = open("/Abstraction/SavedOSConfigs/walqa.json")
-
-        config = json.load(file)
-        scheduler.deleteAssets()
-
-        for asset_type in config:
-            for asset_class in config[asset_type]:
-                for asset in config[asset_type][asset_class].values():
-
-                    scheduler.addAsset(asset_type, asset_class, asset)
+                scheduler.addAsset(asset_type, asset_class, asset)
 
 
 def read_options():
-    
-    # Headers for API request
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.environ['SUPERVISOR_TOKEN']}"
-    }
-
-    #OPTIONS_PATH = os.getenv('OPTIONS_PATH', default="/data/options.json")
-    #options_json = Path(OPTIONS_PATH)
-
-    # Read options info
-    #if options_json.exists():
-    #    with options_json.open('r') as data:
-    #        options = json.load(data)
-        #print(options)
-    #else:
-    #   print("options.json does not exist")
-
-    # Send GET request to fetch options
-    response = requests.get(url="http://supervisor/"+"addons/self", headers=headers) #"http://supervisor/"
-    print(response.text)
-
-    if response.status_code == 200:
-        print(response.json())
-        options = response.json()["data"]
-
-        # Access the options
-        message = options.get("message", "Default message")
-        toggle_something = options.get("Toggle something", False)
-        toggle_something_else = options.get("Toggle something else", False)
-
-        # Now you can use these options as needed
-        print("Message:", message)
-        print("Toggle something:", toggle_something)
-        print("Toggle something else:", toggle_something_else)
-    else:
-        print("Error fetching options:", response.text)
+    pass
 
 
 if __name__ == "__main__":
@@ -111,18 +68,8 @@ if __name__ == "__main__":
     #read_options()
     message = str(sys.argv[1])
 
-    #file = open("/addon_configs/local_optimal_scheduler/optimal_scheduler.yaml")
-    #config = yaml.safe_load(file)
-
-
-    ## Get the 'message' key from the user config options.
-    # Execute the command and capture its output
-    #message = os.environ.get('message') # subprocess.check_output(['bash', '-c', "bashio::config 'message'"]) 
-
-    # Decode the output from bytes to string
-    #message = message.decode('utf-8').strip()
-
     print(message)
+    print(ha.get_entity(entity_id="sun.sun").get_state()) #sensor.dht1_humidity
 
 
 
