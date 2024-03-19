@@ -13,6 +13,7 @@ arch:
 init: false
 apparmor: true
 boot: manual
+###############
 # Try to solve api issues
 homeassistant_api: true
 auth_api: true
