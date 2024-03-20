@@ -78,7 +78,7 @@ headers = {
 
 sensor_entity_id = "sensor.dht1_humidity"
 # Make a GET request to retrieve the state of the sensor
-response = requests.get(f"{ha_url}/api/states", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
+response = requests.get(f"{ha_url}/api/states/{sensor_entity_id}", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
 
 if response.status_code == 200:
     try:
