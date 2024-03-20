@@ -13,6 +13,6 @@ message=$(bashio::config 'message')
 toggle_something=$(bashio::config 'Toggle_something')
 
 ## Run your program
-python Abstraction/main.py "$message"
+python Abstraction/main.py "$SUPERVISOR_TOKEN" "$message"
 
 exit

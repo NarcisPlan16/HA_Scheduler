@@ -66,24 +66,24 @@ if __name__ == "__main__":
     #t2.start()
 
     #read_options()
-    message = str(sys.argv[1])
+    message = str(sys.argv[2])
 
     print(message)
     #print(ha.get_error_log()) #get_entity(entity_id="sensor.dht1_humidity")
 
 headers = {
-    "Authorization": f"Bearer {bearer_token}",
+    "Authorization": f"Bearer {bearer_token}", #str(sys.argv[1]) for SUPERVISED_TOKEN
     "Content-Type": "application/json",
 }
 
 sensor_entity_id = "sensor.dht1_humidity"
 # Make a GET request to retrieve the state of the sensor
-response = requests.get(f"http://supervisor/core/api/states/{sensor_entity_id}", headers=headers)
+response = requests.get(f"{ha_url}/api/states", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
 
 if response.status_code == 200:
     try:
         # Try to decode the JSON response
-        sensor_state = response.json()["state"]
+        sensor_state = response.text#.json() #["state"]
         print(f"The current state of {sensor_entity_id} is: {sensor_state}")
     except json.JSONDecodeError as e:
         # If response is not JSON, print the response content
