@@ -10,15 +10,12 @@ import os
 import subprocess
 #from pathlib import Path
 
-from homeassistant_api import Client
-
 import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-ha_url = "http://192.168.1.192:8123"
+ha_url = "http://192.168.0.117:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYjcxOTI3NmM2ZTA0YzU5YTZmM2YxZmFlOTUxZWM5OSIsImlhdCI6MTcxMDg2Nzc4NywiZXhwIjoyMDI2MjI3Nzg3fQ.72uuDLPBzDVVX7enOXmDlvI-eDcQxU_wPgAeHqw6eGs"
-ha = Client(ha_url, bearer_token) # Connect to Home Assistant instance
 
 def backgroundSimulation(gui, os):
 

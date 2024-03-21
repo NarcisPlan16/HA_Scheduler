@@ -12,9 +12,7 @@ RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
 COPY config.yaml config.yaml
 
-RUN pip install psutil func_timeout requests numpy homeassistant_api
-# homeassistant
-# homeassistant_api
+RUN pip install psutil func_timeout requests numpy
 #CAUSE PROBLEMS: scipy pyswarms
 
 # Command to run when the container starts
