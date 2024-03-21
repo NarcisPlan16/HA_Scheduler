@@ -1,5 +1,9 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 3.0
+- After a long time, sweat and tears... The addon can fulli comunicate with the HomeAssistant API as well as read data from the addon configuraton.
+- Now starting to develop the configuration for the addon and its integration with the python code 
+
 ## 2.4
 - Started options integration
 ## 2.3

@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "2.4"
+version: "3.0"
 slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
@@ -29,11 +29,15 @@ map:
 options:
   message: "Hello world..."
   Toggle_something: true
-  Toggle_something else: false
+  Toggle_something_else: false
+  Some array: []
 
 schema:
   message: "str?"
   Toggle_something: bool
-  Toggle_something else: bool
+  Toggle_something_else: bool
+  Some array: 
+    - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
+
 
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"
