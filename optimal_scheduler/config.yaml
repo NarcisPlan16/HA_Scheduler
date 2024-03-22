@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "3.0"
+version: "3.1"
 slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
@@ -30,13 +30,22 @@ options:
   message: "Hello world..."
   Toggle_something: true
   Toggle_something_else: false
-  Some array: []
+  Consumer asset IDs: []
+  Generator asset IDs: []
+  Energy Source asset IDs: []
+  Building consumption IDs: []
 
 schema:
   message: "str?"
   Toggle_something: bool
   Toggle_something_else: bool
-  Some array: 
+  Consumer asset IDs: 
+    - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
+  Generator asset IDs:
+    - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
+  Energy Source asset IDs:
+    - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
+  Building consumption IDs:
     - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
 
 

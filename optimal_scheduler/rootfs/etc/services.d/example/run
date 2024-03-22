@@ -11,8 +11,9 @@ declare toggle_something
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 toggle_something=$(bashio::config 'Toggle_something')
+Consumer_asset_IDs=$(bashio::config 'Consumer asset IDs')
 
 ## Run your program
-python Abstraction/main.py "$SUPERVISOR_TOKEN" "$message"
+python Abstraction/main.py "$SUPERVISOR_TOKEN" "$message" "$Consumer_asset_IDs"
 
 exit
