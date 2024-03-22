@@ -11,6 +11,8 @@ import subprocess
 #from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
+from flask import Flask
+
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
@@ -52,6 +54,12 @@ def read_options():
 
 
 if __name__ == "__main__":
+
+    app = Flask(__name__)
+
+    @app.route('/')
+    def hello_world():
+        return 'Hello, World! This is my addon website.'
 
     #event = threading.Event()
     scheduler = optimalscheduler.OptimalScheduler()
