@@ -10,6 +10,9 @@ COPY rootfs /
 
 RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
+# Try to convert all files into LF format
+#RUN find /rootfs -type f -exec dos2unix {} \; 
+
 COPY config.yaml config.yaml
 
 RUN pip install psutil func_timeout requests numpy flask

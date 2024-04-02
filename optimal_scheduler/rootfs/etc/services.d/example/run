@@ -5,16 +5,17 @@
 # ==============================================================================
 
 # Declare variables
-declare message
-declare toggle_something
+declare Consumer_asset_IDs
+declare Generator_asset_IDs
 declare Consumer_asset_IDs
 
-## Get the 'message' key from the user config options.
-message=$(bashio::config 'message')
-toggle_something=$(bashio::config 'Toggle_something')
+## Get the the user config options.
 Consumer_asset_IDs=$(bashio::config 'Consumer_asset_IDs')
+Generator_asset_IDs=$(bashio::config 'Generator_asset_IDs')
+Energy_Source_asset_IDs=$(bashio::config 'Energy_Source_asset_IDs')
+Building_consumption_IDs=$(bashio::config 'Building_consumption_IDs')
 
 ## Run your program
-python Abstraction/main.py "$SUPERVISOR_TOKEN" "$message" "$Consumer_asset_IDs"
+python Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs"
 
 exit
