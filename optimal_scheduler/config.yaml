@@ -31,6 +31,7 @@ options:
   Generator_asset_IDs: []
   Energy_Source_asset_IDs: []
   Building_consumption_IDs: []
+  Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
 
 schema:
   Consumer_asset_IDs: 
@@ -41,6 +42,7 @@ schema:
     - match(^(.+)$) # TODO: Generate a new regex
   Building_consumption_IDs:
     - match(^(.+)$) # TODO: Generate a new regex
+  Simulation_code_directory: str
 
 
 #image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"

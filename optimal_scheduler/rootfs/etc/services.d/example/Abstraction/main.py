@@ -11,8 +11,6 @@ import subprocess
 #from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
-from flask import Flask
-
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
@@ -72,14 +70,21 @@ def checkEnergySources(entity_ids):
 def checkBuilding(entity_ids):
     pass
 
+def pairSimulationFiles():
+
+    result = []
+    
+    entities = str(sys.argv[4] + "\n" + sys.argv[3] + "\n" + sys.argv[2]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
+    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
+    print(list_dir)
+    for entity in entities:
+        if list_dir.__contains__(entity+".py"):
+            result.append((entity, "/config/OptimalScheduler/MySimulationCode/"+entity+".py"))
+
+    return result
+
 
 if __name__ == "__main__":
-
-    app = Flask(__name__)
-
-    @app.route('/')
-    def hello_world():
-        return 'Hello, World! This is my addon website.'
 
     #event = threading.Event()
     scheduler = optimalscheduler.OptimalScheduler()
@@ -104,13 +109,18 @@ if __name__ == "__main__":
             #for entity in entity_ids:
             #    print(entity)
 
-            print(str(sys.argv[2]))
             checkConsumers(entity_ids)
             checkGenerators(entity_ids)
             checkEnergySources(entity_ids)
             checkBuilding(entity_ids)
 
             print("[DEBUG]: All entities found!")
+
+            paired_entities = pairSimulationFiles()
+            if paired_entities.__len__ == 0 and entity_ids.__len__ > 0:
+                print("[DEBUG]: Some files for the simulation not found")
+
+            print(paired_entities)
 
         except json.JSONDecodeError as e:
             # If response is not JSON, print the response content
