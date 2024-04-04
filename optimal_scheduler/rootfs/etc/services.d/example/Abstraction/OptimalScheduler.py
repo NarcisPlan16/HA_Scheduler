@@ -749,24 +749,6 @@ class OptimalScheduler:
         x_values = range(1, len(self.progress)+1)
         print(x_values)
 
-        #plt.plot(x_values, self.progress)
-        #plt.grid()
-        #plt.xlabel("Iteration")
-        #plt.ylabel("Cost (€)")
-        #plt.title("Cost over iterations")
-
-        #fig1 = plt.gcf()
-
-        #current_dir = os.getcwd()
-        #if self.console_debug:
-        #    current_dir = os.path.join(current_dir, "Abstraction")
-        #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
-
-        #os.makedirs("result_imgs", exist_ok=True)
-        #fig1.savefig("result_imgs/cost.png", dpi=200, )
-
-        #plt.show()
-
         self.mostrarResultat(temps_fi - temps_inici)
 
     def __unpackSimulationResults(self, res_dictionary: dict):
@@ -805,9 +787,7 @@ class OptimalScheduler:
     def addAsset(self, asset_type, asset_class, asset_config):
 
         configurator = Configurator(console=self.console_debug)
-
-        assets_dir = os.getcwd()
-        path = os.path.join(assets_dir, "Abstraction", "Asset_types", asset_type)
+        path = os.path.join("Asset_types", asset_type)
 
         asset = configurator.configureAndCreate(path, asset_class, asset_config)
 

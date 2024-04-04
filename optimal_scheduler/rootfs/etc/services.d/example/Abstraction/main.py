@@ -14,28 +14,8 @@ import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-ha_url = "http://192.168.1.192:8123"
+ha_url = "http://192.168.0.117:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYjcxOTI3NmM2ZTA0YzU5YTZmM2YxZmFlOTUxZWM5OSIsImlhdCI6MTcxMDg2Nzc4NywiZXhwIjoyMDI2MjI3Nzg3fQ.72uuDLPBzDVVX7enOXmDlvI-eDcQxU_wPgAeHqw6eGs"
-
-def backgroundSimulation(gui, os):
-
-    read_pipe, write_pipe = multiprocessing.Pipe()
-
-    t2 = multiprocessing.Process(target=os.startOptimization, args=(write_pipe,))
-    t2.start()
-
-    gui.updateProgress(read_pipe)
-
-
-def checkloop(event: threading.Event):
-
-    while True:
-
-        event.wait()
-        #backgroundSimulation(app, scheduler)
-
-        time.sleep(2)
-
 
 def checkConsumers(entity_ids):
 
@@ -72,26 +52,73 @@ def checkBuilding(entity_ids):
 
 def pairSimulationFiles():
 
-    result = []
+    result = {"Consumers": {}, "Generators": {}, "Energy Sources": {}}
     
-    entities = str(sys.argv[4] + "\n" + sys.argv[3] + "\n" + sys.argv[2]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
+    # Convert the inputed consumers, generators and energy sources strings into an array. They must be separated by enlines (\n)
+    entities = str(sys.argv[2]).split("\n") 
     list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
-    print(list_dir)
     for entity in entities:
         if list_dir.__contains__(entity+".py"):
-            result.append((entity, "/config/OptimalScheduler/MySimulationCode/"+entity+".py"))
+            result["Consumers"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
+
+    entities = str(sys.argv[3]).split("\n") 
+    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
+    for entity in entities:
+        if list_dir.__contains__(entity+".py"):
+            result["Generators"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
+
+    entities = str(sys.argv[4]).split("\n") 
+    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
+    for entity in entities:
+        if list_dir.__contains__(entity+".py"):
+            result["Energy Sources"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
 
     return result
 
+def configure(entity, entity_sim):
+    
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get(f"{ha_url}/api/states/{entity}", headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        data["attributes"]["name"] = entity # add the name field into the config
+
+        headers = {
+            "Authorization": f"Bearer {bearer_token}",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "file_path": f"/config/OptimalScheduler/MySimulationCode/{entity_sim}"
+        }
+
+        response_simulate = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body)
+        if response_simulate.status_code == 200:
+            print(str(response_simulate.json()))
+            data["attributes"]["simulate"] = str(response_simulate.json())
+            return data["attributes"]
+
+
+
+def initEntities(entities_list, asset_type, scheduler: optimalscheduler.OptimalScheduler):
+
+    for entity in entities_list:
+        asset_config = configure(entity[0], entity[1])
+        scheduler.addAsset(asset_type, entity, asset_config)
+
+def startSimulation(paired_entities):
+
+    scheduler = optimalscheduler.OptimalScheduler()
+    consumers = initEntities(paired_entities["Consumers"], "Consumers", scheduler)
+    generators = initEntities(paired_entities["Generators"], "Generators", scheduler)
+    energy_sources = initEntities(paired_entities["Energy Sources"], "EnergySources", scheduler)
+    scheduler.startOptimizationNoPipe()
+
 
 if __name__ == "__main__":
-
-    #event = threading.Event()
-    scheduler = optimalscheduler.OptimalScheduler()
-
-    #write_pipe = multiprocessing.Pipe()
-    #t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
-    #t2.start()
 
     headers = {
         "Authorization": f"Bearer {bearer_token}", #str(sys.argv[1]) for SUPERVISED_TOKEN
@@ -120,7 +147,9 @@ if __name__ == "__main__":
             if paired_entities.__len__ == 0 and entity_ids.__len__ > 0:
                 print("[DEBUG]: Some files for the simulation not found")
 
-            print(paired_entities)
+            #print(paired_entities)
+
+            startSimulation(paired_entities)
 
         except json.JSONDecodeError as e:
             # If response is not JSON, print the response content

@@ -185,6 +185,9 @@ class Configurator:
 
         asset_path = os.path.join(path, asset_type)
         module_path = os.path.relpath(asset_path)
+
+        print(asset_path)
+        print(module_path)
         classe = utils.createClass(module_path, asset_type)
         # Obtenim la classe des de l'string asset_type amb el path dels moduls
 
