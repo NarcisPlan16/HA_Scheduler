@@ -98,14 +98,17 @@ def configure(entity, files):
             "Content-Type": "application/json",
         }
         body_sim = {
-            "file_path": f"/config/OptimalScheduler/MySimulationCode/SIMU_{files["Simulate"]}"
+            "file_path": f"/config/OptimalScheduler/MySimulationCode/SIMU_{entity}"
         }
         body_class = {
-            "file_path": f"/config/OptimalScheduler/MyClassesCode/{files["Class"]}"
+            "file_path": f"/config/OptimalScheduler/MyClassesCode/{entity}"
         }
 
         response_simulate = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_sim)
         response_class = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_class)
+
+        print("Simulate status code: " + str(response_simulate.status_code))
+        print("class status code: " + str(response_class.status_code))
         if response_simulate.status_code == 200 and response_class.status_code == 200:
             print(str(response_simulate.json()))
             data["attributes"]["Simulate"] = str(response_simulate.json())
