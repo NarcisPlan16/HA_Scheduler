@@ -3,17 +3,23 @@
 import importlib
 
 
-def createClass(path, asset_type):
+def createClass(asset_class, asset_config):
 
-    path_module = path.replace(".", "")
-    path_module = path_module.replace("/", ".")
-    path_module = path_module.replace("\\", ".")
-    # Canvis a la string del path perquè els mòduls s'importen amb format Abstraction.Asset_types. ...
+    # Split the class string into class name and content
+    class_lines = asset_class.strip().split('\n')
+    class_name = class_lines[0].split(' ')[1]
+    class_content = '\n'.join(class_lines[1:])
 
-    module = importlib.import_module(path_module + "." + asset_type)
-    classe = getattr(module, asset_type)  # Obtenim la classe que hem de crear ara (Electrolyzer, EVCharger...)
+    # Define a namespace for the new class
+    class_namespace = {}
 
-    return classe
+    # Execute the class content within the namespace
+    exec(class_content, globals(), class_namespace)
+
+    # Retrieve the class from the namespace
+    created_class = class_namespace[class_name]
+
+    return created_class
 
 
 def isNumber(value):

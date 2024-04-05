@@ -55,27 +55,33 @@ def pairSimulationFiles():
     result = {"Consumers": {}, "Generators": {}, "Energy Sources": {}}
     
     # Convert the inputed consumers, generators and energy sources strings into an array. They must be separated by enlines (\n)
+    list_simu_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
+    list_class_dir = os.listdir("/config/OptimalScheduler/MyClassesCode") # Get the list of files on the classes directory
+
     entities = str(sys.argv[2]).split("\n") 
-    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
     for entity in entities:
-        if list_dir.__contains__(entity+".py"):
-            result["Consumers"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
+        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+            result["Consumers"][entity] = {}
+            result["Consumers"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+            result["Consumers"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
 
     entities = str(sys.argv[3]).split("\n") 
-    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
     for entity in entities:
-        if list_dir.__contains__(entity+".py"):
-            result["Generators"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
+        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+            result["Generators"][entity] = {}
+            result["Generators"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+            result["Generators"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
 
     entities = str(sys.argv[4]).split("\n") 
-    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
     for entity in entities:
-        if list_dir.__contains__(entity+".py"):
-            result["Energy Sources"][entity] = "/config/OptimalScheduler/MySimulationCode/"+entity+".py"
+        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+            result["Energy Sources"][entity] = {}            
+            result["Energy Sources"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+            result["Energy Sources"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
 
     return result
 
-def configure(entity, entity_sim):
+def configure(entity, files):
     
     headers = {
         "Authorization": f"Bearer {bearer_token}",
@@ -91,30 +97,37 @@ def configure(entity, entity_sim):
             "Authorization": f"Bearer {bearer_token}",
             "Content-Type": "application/json",
         }
-        body = {
-            "file_path": f"/config/OptimalScheduler/MySimulationCode/{entity_sim}"
+        body_sim = {
+            "file_path": f"/config/OptimalScheduler/MySimulationCode/SIMU_{files["Simulate"]}"
+        }
+        body_class = {
+            "file_path": f"/config/OptimalScheduler/MyClassesCode/{files["Class"]}"
         }
 
-        response_simulate = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body)
-        if response_simulate.status_code == 200:
+        response_simulate = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_sim)
+        response_class = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_class)
+        if response_simulate.status_code == 200 and response_class.status_code == 200:
             print(str(response_simulate.json()))
-            data["attributes"]["simulate"] = str(response_simulate.json())
+            data["attributes"]["Simulate"] = str(response_simulate.json())
+            data["attributes"]["Class"] = str(response_class.json())
+            print("main configure: " + data["attributes"]) # NO ENTRA A AQUI (dins l'if)....
             return data["attributes"]
 
 
 
-def initEntities(entities_list, asset_type, scheduler: optimalscheduler.OptimalScheduler):
+def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.OptimalScheduler):
 
-    for entity in entities_list:
-        asset_config = configure(entity[0], entity[1])
-        scheduler.addAsset(asset_type, entity, asset_config)
+    for entity, files in entities_list.items():
+        asset_config = configure(entity, files) # entity name, entity simula and entity class
+        print("main: " + asset_config)
+        scheduler.addAsset(entity_type, entity, asset_config)
 
 def startSimulation(paired_entities):
 
     scheduler = optimalscheduler.OptimalScheduler()
-    consumers = initEntities(paired_entities["Consumers"], "Consumers", scheduler)
-    generators = initEntities(paired_entities["Generators"], "Generators", scheduler)
-    energy_sources = initEntities(paired_entities["Energy Sources"], "EnergySources", scheduler)
+    consumers = initEntities("Consumers", paired_entities["Consumers"], scheduler)
+    generators = initEntities("Generators", paired_entities["Generators"], scheduler)
+    energy_sources = initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
     scheduler.startOptimizationNoPipe()
 
 
@@ -125,7 +138,6 @@ if __name__ == "__main__":
         "Content-Type": "application/json",
     }
 
-    sensor_entity_id = "sensor.dht1_humidity"
     # Make a GET request to retrieve the state of the sensor
     response = requests.get(f"{ha_url}/api/states", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
     
