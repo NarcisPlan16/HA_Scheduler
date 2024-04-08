@@ -58,31 +58,43 @@ def pairSimulationFiles():
     list_simu_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
     list_class_dir = os.listdir("/config/OptimalScheduler/MyClassesCode") # Get the list of files on the classes directory
 
-    entities = str(sys.argv[2]).split("\n") 
-    for entity in entities:
-        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
-            result["Consumers"][entity] = {}
-            result["Consumers"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
-            result["Consumers"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+    if str(sys.argv[2]): # String not empty
 
-    entities = str(sys.argv[3]).split("\n") 
-    for entity in entities:
-        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
-            result["Generators"][entity] = {}
-            result["Generators"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
-            result["Generators"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+        entities = str(sys.argv[2]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+                result["Consumers"][entity] = {}
+                result["Consumers"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Consumers"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
-    entities = str(sys.argv[4]).split("\n") 
-    for entity in entities:
-        if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
-            result["Energy Sources"][entity] = {}            
-            result["Energy Sources"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
-            result["Energy Sources"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+    if str(sys.argv[3]): # String not empty
+
+        entities = str(sys.argv[3]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+                result["Generators"][entity] = {}
+                result["Generators"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Generators"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
+
+    if str(sys.argv[4]): # String not empty
+
+        entities = str(sys.argv[4]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+                result["Energy Sources"][entity] = {}            
+                result["Energy Sources"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Energy Sources"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
     return result
 
-def configure(entity, files):
-    
+def configure(entity: str, files):
+ 
     headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json",
@@ -90,31 +102,18 @@ def configure(entity, files):
 
     response = requests.get(f"{ha_url}/api/states/{entity}", headers=headers)
     if response.status_code == 200:
+
         data = response.json()
         data["attributes"]["name"] = entity # add the name field into the config
 
-        headers = {
-            "Authorization": f"Bearer {bearer_token}",
-            "Content-Type": "application/json",
-        }
-        body_sim = {
-            "file_path": f"/config/OptimalScheduler/MySimulationCode/SIMU_{entity}"
-        }
-        body_class = {
-            "file_path": f"/config/OptimalScheduler/MyClassesCode/{entity}"
-        }
+        with open(files["Simulate"], 'r') as file:
+            data["attributes"]["Simulate"] = file.read()
+        with open(files["Class"], 'r') as file:
+            data["attributes"]["Class"] = file.read()
 
-        response_simulate = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_sim)
-        response_class = requests.get(f"{ha_url}/api/states/file.path", headers=headers, data=body_class)
-
-        print("Simulate status code: " + str(response_simulate.status_code))
-        print("class status code: " + str(response_class.status_code))
-        if response_simulate.status_code == 200 and response_class.status_code == 200:
-            print(str(response_simulate.json()))
-            data["attributes"]["Simulate"] = str(response_simulate.json())
-            data["attributes"]["Class"] = str(response_class.json())
-            print("main configure: " + data["attributes"]) # NO ENTRA A AQUI (dins l'if)....
-            return data["attributes"]
+        return data["attributes"]
+    else:
+        print(f"[ERROR] configure(): Entity {entity} not found")
 
 
 
@@ -122,7 +121,6 @@ def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.O
 
     for entity, files in entities_list.items():
         asset_config = configure(entity, files) # entity name, entity simula and entity class
-        print("main: " + asset_config)
         scheduler.addAsset(entity_type, entity, asset_config)
 
 def startSimulation(paired_entities):
@@ -156,14 +154,7 @@ if __name__ == "__main__":
             checkEnergySources(entity_ids)
             checkBuilding(entity_ids)
 
-            print("[DEBUG]: All entities found!")
-
             paired_entities = pairSimulationFiles()
-            if paired_entities.__len__ == 0 and entity_ids.__len__ > 0:
-                print("[DEBUG]: Some files for the simulation not found")
-
-            #print(paired_entities)
-
             startSimulation(paired_entities)
 
         except json.JSONDecodeError as e:
@@ -173,5 +164,4 @@ if __name__ == "__main__":
             print("JSONDecodeError:", e)
     else:
         # Print error message if request was not successful
-        print(f"Failed to retrieve state for sensor {sensor_entity_id}. Status code: {response.status_code}")
-
+        print(response.text)

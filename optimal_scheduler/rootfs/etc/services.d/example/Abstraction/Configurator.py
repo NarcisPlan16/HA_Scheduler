@@ -183,7 +183,6 @@ class Configurator:
 
     def configureAndCreate(self, asset_class, asset_config):
 
-        print("Configurator - asset config: " + asset_config)
         classe = utils.createClass(asset_class, asset_config["Class"])
         # Obtenim la classe des de l'string asset_class
 

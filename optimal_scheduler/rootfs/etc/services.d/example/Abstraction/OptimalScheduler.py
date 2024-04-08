@@ -788,7 +788,6 @@ class OptimalScheduler:
         # asset type = "generator"... asset_class = name of the asset/class file name
 
         configurator = Configurator(console=self.console_debug)
-        print("OS - Asset config: " + asset_config)
         asset = configurator.configureAndCreate(asset_class, asset_config)
 
         if not self.assets[asset_type].__contains__(asset_class):

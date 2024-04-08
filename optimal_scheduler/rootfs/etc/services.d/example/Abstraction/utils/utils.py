@@ -7,6 +7,7 @@ def createClass(asset_class, asset_config):
 
     # Split the class string into class name and content
     class_lines = asset_class.strip().split('\n')
+    print(class_lines)
     class_name = class_lines[0].split(' ')[1]
     class_content = '\n'.join(class_lines[1:])
 
