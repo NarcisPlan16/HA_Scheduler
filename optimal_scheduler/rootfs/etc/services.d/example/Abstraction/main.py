@@ -126,9 +126,9 @@ def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.O
 def startSimulation(paired_entities):
 
     scheduler = optimalscheduler.OptimalScheduler()
-    consumers = initEntities("Consumers", paired_entities["Consumers"], scheduler)
-    generators = initEntities("Generators", paired_entities["Generators"], scheduler)
-    energy_sources = initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
+    initEntities("Consumers", paired_entities["Consumers"], scheduler)
+    initEntities("Generators", paired_entities["Generators"], scheduler)
+    initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
     scheduler.startOptimizationNoPipe()
 
 

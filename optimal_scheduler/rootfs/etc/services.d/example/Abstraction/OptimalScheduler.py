@@ -24,11 +24,6 @@ from geneticalgorithm.geneticalgorithm import geneticalgorithm
 
 class OptimalScheduler:
 
-    class Result:
-
-        def __init__(self, x_config: list):
-            self.x = x_config
-
     def __init__(self):
 
         self.connections = []
@@ -80,7 +75,7 @@ class OptimalScheduler:
         #resultat = self.__runDIRECTModel(self.costSA)
 
         # GA
-        model = self.__initializeGAModel(96, self.costDE, self.varbound)
+        model = self.__initializeGAModel(len(self.varbound), self.costDE, self.varbound)
         resultat = self.__runGAModel(model)
 
         # Retornem la configuracio de les variables del model

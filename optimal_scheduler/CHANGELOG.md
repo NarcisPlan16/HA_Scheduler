@@ -1,10 +1,13 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 4.0
+- The addon works!! Many improvements are needed in order to work correctly but with this update we've proved our theory that it can be done. (It will work better or worse but at least is viable).
+
 ## 3.1
 - Added Assets input on addon configuration
 
 ## 3.0
-- After a long time, sweat and tears... The addon can fulli comunicate with the HomeAssistant API as well as read data from the addon configuraton.
+- After a long time, sweat and tears... The addon can fully comunicate with the HomeAssistant API as well as read data from the addon configuraton.
 - Now starting to develop the configuration for the addon and its integration with the python code 
 
 ## 2.4
