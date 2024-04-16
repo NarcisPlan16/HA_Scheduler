@@ -15,7 +15,7 @@ import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-ha_url = "http://192.168.0.117:8123"
+ha_url = "http://192.168.1.192:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYjcxOTI3NmM2ZTA0YzU5YTZmM2YxZmFlOTUxZWM5OSIsImlhdCI6MTcxMDg2Nzc4NywiZXhwIjoyMDI2MjI3Nzg3fQ.72uuDLPBzDVVX7enOXmDlvI-eDcQxU_wPgAeHqw6eGs"
 
 def checkConsumers(entity_ids):
@@ -118,7 +118,7 @@ def configure(entity: str, files):
             file_data = tomllib.load(file)
             for key, value in file_data.items():
                 data["attributes"][key] = value
-                
+
         return data["attributes"]
     else:
         print(f"[ERROR] configure(): Entity {entity} not found")
