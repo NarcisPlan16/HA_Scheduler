@@ -24,11 +24,6 @@ from geneticalgorithm.geneticalgorithm import geneticalgorithm
 
 class OptimalScheduler:
 
-    class Result:
-
-        def __init__(self, x_config: list):
-            self.x = x_config
-
     def __init__(self):
 
         self.connections = []
@@ -80,7 +75,7 @@ class OptimalScheduler:
         #resultat = self.__runDIRECTModel(self.costSA)
 
         # GA
-        model = self.__initializeGAModel(96, self.costDE, self.varbound)
+        model = self.__initializeGAModel(len(self.varbound), self.costDE, self.varbound)
         resultat = self.__runGAModel(model)
 
         # Retornem la configuracio de les variables del model
@@ -743,29 +738,12 @@ class OptimalScheduler:
         #    prof.disable()
         #    prof.print_stats(sort='cumtime')
 
-        self.solucio_final.model_variables = result.x
+        print(result)
+        self.solucio_final.model_variables = result #result.x for the DE algorithm
         self.solucio_final.temps_tardat = temps_fi - temps_inici
 
         x_values = range(1, len(self.progress)+1)
         print(x_values)
-
-        #plt.plot(x_values, self.progress)
-        #plt.grid()
-        #plt.xlabel("Iteration")
-        #plt.ylabel("Cost (€)")
-        #plt.title("Cost over iterations")
-
-        #fig1 = plt.gcf()
-
-        #current_dir = os.getcwd()
-        #if self.console_debug:
-        #    current_dir = os.path.join(current_dir, "Abstraction")
-        #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
-
-        #os.makedirs("result_imgs", exist_ok=True)
-        #fig1.savefig("result_imgs/cost.png", dpi=200, )
-
-        #plt.show()
 
         self.mostrarResultat(temps_fi - temps_inici)
 
@@ -803,13 +781,10 @@ class OptimalScheduler:
                 source.resetToInit()
 
     def addAsset(self, asset_type, asset_class, asset_config):
+        # asset type = "generator"... asset_class = name of the asset/class file name
 
         configurator = Configurator(console=self.console_debug)
-
-        assets_dir = os.getcwd()
-        path = os.path.join(assets_dir, "Abstraction", "Asset_types", asset_type)
-
-        asset = configurator.configureAndCreate(path, asset_class, asset_config)
+        asset = configurator.configureAndCreate(asset_class, asset_config)
 
         if not self.assets[asset_type].__contains__(asset_class):
             self.assets[asset_type][asset_class] = {}

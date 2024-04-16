@@ -22,5 +22,5 @@ class Crane(AbsConsumer):
         self.config['calendar'] = kwargs['calendar']
         return self.simul.simula(self.simul, self.config, kwargs_simulation=kwargs['kwargs_simulation'])
 
-    def canviaSimula(self, simImpl):  # simInte will be an implementation of the Simulate interface
+    def canviaSimula(self, simImpl):  # simImpl will be an implementation of the Simulate interface
         self.simul = simImpl

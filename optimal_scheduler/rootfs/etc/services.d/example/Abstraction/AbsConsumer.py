@@ -8,7 +8,7 @@ class AbsConsumer:
     def __init__(self, configuration, name):
         self.config = configuration
         self.name = name
-        self.max_power = configuration['max_power']
+        #self.max_power = configuration['max_power']
         self.calendar_range = configuration['calendar_range']
         self.active_hours = configuration['active_hours']
         self.active_calendar = configuration['active_calendar']

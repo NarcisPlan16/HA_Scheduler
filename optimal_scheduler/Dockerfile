@@ -3,22 +3,17 @@
 FROM ghcr.io/home-assistant/aarch64-base-python:latest
 
 ENV PATH="${PATH}:/usr/lib/bashio"
-#ENV PATH="${PATH}:/usr/python"
 
 # Copy root filesystem
 COPY rootfs /
 
 RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
-# Try to convert all files into LF format
+# TODO: Try to convert all files into LF format because github converts them to CRLF and the addon does not work with CLF format
 #RUN find /rootfs -type f -exec dos2unix {} \; 
 
 COPY config.yaml config.yaml
 
 RUN pip install psutil func_timeout requests numpy flask
-#flask #cherrypy
 #CAUSE PROBLEMS: scipy pyswarms
 
-# Command to run when the container starts
-#CMD ["python", "Abstraction/main.py"]
-#CMD ["sh", "./run.sh"]

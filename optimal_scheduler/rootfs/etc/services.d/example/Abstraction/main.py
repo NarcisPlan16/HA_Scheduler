@@ -8,6 +8,7 @@ import sys
 import requests
 import os
 import subprocess
+import tomllib
 #from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
@@ -16,26 +17,6 @@ import OptimalScheduler as optimalscheduler
 # TODO: WORK WITH .secrets
 ha_url = "http://192.168.1.192:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYjcxOTI3NmM2ZTA0YzU5YTZmM2YxZmFlOTUxZWM5OSIsImlhdCI6MTcxMDg2Nzc4NywiZXhwIjoyMDI2MjI3Nzg3fQ.72uuDLPBzDVVX7enOXmDlvI-eDcQxU_wPgAeHqw6eGs"
-
-def backgroundSimulation(gui, os):
-
-    read_pipe, write_pipe = multiprocessing.Pipe()
-
-    t2 = multiprocessing.Process(target=os.startOptimization, args=(write_pipe,))
-    t2.start()
-
-    gui.updateProgress(read_pipe)
-
-
-def checkloop(event: threading.Event):
-
-    while True:
-
-        event.wait()
-        #backgroundSimulation(app, scheduler)
-
-        time.sleep(2)
-
 
 def checkConsumers(entity_ids):
 
@@ -72,33 +53,100 @@ def checkBuilding(entity_ids):
 
 def pairSimulationFiles():
 
-    result = []
+    result = {"Consumers": {}, "Generators": {}, "Energy Sources": {}}
     
-    entities = str(sys.argv[4] + "\n" + sys.argv[3] + "\n" + sys.argv[2]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
-    list_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
-    print(list_dir)
-    for entity in entities:
-        if list_dir.__contains__(entity+".py"):
-            result.append((entity, "/config/OptimalScheduler/MySimulationCode/"+entity+".py"))
+    # Convert the inputed consumers, generators and energy sources strings into an array. They must be separated by enlines (\n)
+    list_simu_dir = os.listdir("/config/OptimalScheduler/MySimulationCode") # Get the list of files on the config directory
+    list_class_dir = os.listdir("/config/OptimalScheduler/MyClassesCode") # Get the list of files on the classes directory
+
+    if str(sys.argv[2]): # String not empty
+
+        entities = str(sys.argv[2]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py") and list_simu_dir.__contains__("SIMU_"+entity+".toml"):
+                result["Consumers"][entity] = {}
+                result["Consumers"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Consumers"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+                result["Consumers"][entity]["New_attributes"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".toml"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
+
+    if str(sys.argv[3]): # String not empty
+
+        entities = str(sys.argv[3]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+                result["Generators"][entity] = {}
+                result["Generators"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Generators"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+                result["Generators"][entity]["New_attributes"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".toml"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
+
+    if str(sys.argv[4]): # String not empty
+
+        entities = str(sys.argv[4]).split("\n") 
+        for entity in entities:
+            if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
+                result["Energy Sources"][entity] = {}            
+                result["Energy Sources"][entity]["Simulate"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".py"
+                result["Energy Sources"][entity]["Class"] = "/config/OptimalScheduler/MyClassesCode/"+entity+".py"
+                result["Energy Sources"][entity]["New_attributes"] = "/config/OptimalScheduler/MySimulationCode/SIMU_"+entity+".toml"
+            else:
+                print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
     return result
 
+def configure(entity: str, files):
+ 
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get(f"{ha_url}/api/states/{entity}", headers=headers)
+    if response.status_code == 200:
+
+        data = response.json()
+        data["attributes"]["name"] = entity # add the name field into the config
+
+        with open(files["Simulate"], 'r') as file:
+            data["attributes"]["Simulate"] = file.read()
+        with open(files["Class"], 'r') as file:
+            data["attributes"]["Class"] = file.read()
+        with open(files["New_attributes"], 'rb') as file:
+            file_data = tomllib.load(file)
+            for key, value in file_data.items():
+                data["attributes"][key] = value
+
+        return data["attributes"]
+    else:
+        print(f"[ERROR] configure(): Entity {entity} not found")
+
+
+
+def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.OptimalScheduler):
+
+    for entity, files in entities_list.items():
+        asset_config = configure(entity, files) # entity name, entity simula and entity class
+        scheduler.addAsset(entity_type, entity, asset_config)
+
+def startSimulation(paired_entities):
+
+    scheduler = optimalscheduler.OptimalScheduler()
+    initEntities("Consumers", paired_entities["Consumers"], scheduler)
+    initEntities("Generators", paired_entities["Generators"], scheduler)
+    initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
+    scheduler.startOptimizationNoPipe()
+
 
 if __name__ == "__main__":
-
-    #event = threading.Event()
-    scheduler = optimalscheduler.OptimalScheduler()
-
-    #write_pipe = multiprocessing.Pipe()
-    #t2 = multiprocessing.Process(target=scheduler.startOptimizationNoPipe)#, args=(write_pipe,))
-    #t2.start()
 
     headers = {
         "Authorization": f"Bearer {bearer_token}", #str(sys.argv[1]) for SUPERVISED_TOKEN
         "Content-Type": "application/json",
     }
 
-    sensor_entity_id = "sensor.dht1_humidity"
     # Make a GET request to retrieve the state of the sensor
     response = requests.get(f"{ha_url}/api/states", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
     
@@ -114,13 +162,8 @@ if __name__ == "__main__":
             checkEnergySources(entity_ids)
             checkBuilding(entity_ids)
 
-            print("[DEBUG]: All entities found!")
-
             paired_entities = pairSimulationFiles()
-            if paired_entities.__len__ == 0 and entity_ids.__len__ > 0:
-                print("[DEBUG]: Some files for the simulation not found")
-
-            print(paired_entities)
+            startSimulation(paired_entities)
 
         except json.JSONDecodeError as e:
             # If response is not JSON, print the response content
@@ -129,5 +172,4 @@ if __name__ == "__main__":
             print("JSONDecodeError:", e)
     else:
         # Print error message if request was not successful
-        print(f"Failed to retrieve state for sensor {sensor_entity_id}. Status code: {response.status_code}")
-
+        print(response.text)

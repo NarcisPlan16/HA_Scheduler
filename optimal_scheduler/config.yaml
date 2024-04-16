@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "3.1"
+version: "4.0"
 slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
@@ -32,6 +32,7 @@ options:
   Energy_Source_asset_IDs: []
   Building_consumption_IDs: []
   Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
+  Classes_code_directory: /config/OptimalScheduler/MyClassesCode
 
 schema:
   Consumer_asset_IDs: 
@@ -43,6 +44,5 @@ schema:
   Building_consumption_IDs:
     - match(^(.+)$) # TODO: Generate a new regex
   Simulation_code_directory: str
+  Classes_code_directory: str
 
-
-#image: "ghcr.io/NarcisPlan16/{arch}-optimal_scheduler"

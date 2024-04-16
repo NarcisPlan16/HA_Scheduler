@@ -181,12 +181,10 @@ class Configurator:
 
         return buildings, consumers, energy_sources, generators
 
-    def configureAndCreate(self, path, asset_type, asset_config):
+    def configureAndCreate(self, asset_class, asset_config):
 
-        asset_path = os.path.join(path, asset_type)
-        module_path = os.path.relpath(asset_path)
-        classe = utils.createClass(module_path, asset_type)
-        # Obtenim la classe des de l'string asset_type amb el path dels moduls
+        classe = utils.createClass(asset_config["Class"])
+        # Obtenim la classe des de l'string asset_class
 
-        return classe(asset_config, asset_config['name'])  # Constructor de la classe
+        return classe(asset_config, asset_class)  # Constructor de la classe. asset_class == asset_config["name"] == name
         # Instanciem la nova classe amb la configuració i el nom, i la retornem
