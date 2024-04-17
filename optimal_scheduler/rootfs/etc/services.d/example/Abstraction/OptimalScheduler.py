@@ -616,7 +616,9 @@ class OptimalScheduler:
         print("\n")
 
         print("---Consum per hores total---")
-        print(self.solucio_final.balanc_energetic_per_hores)
+        print(self.solucio_final.balanc_energetic_per_hores) 
+        # TODO: Fix. Now it does not work. The array is empty. Possible fix to try: do no save the "solution" and only save the model.
+        #       When the algorithm finishes, take the model and calculate the data for every asset using the variable states.
         print("\n")
 
         print("****************************************************")
