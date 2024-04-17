@@ -581,9 +581,9 @@ class OptimalScheduler:
 
                 print(consumer.name)
 
-                end += consumer.active_hours
+                end += consumer.active_calendar[1] + 1
                 print(self.solucio_final.model_variables[start:end])
-                start = end
+                start = end + 1
 
                 print("\n")
 
@@ -592,9 +592,9 @@ class OptimalScheduler:
 
                 print(source.name)
 
-                end += source.active_hours
+                end += source.active_calendar[1] + 1
                 print(self.solucio_final.model_variables[start:end])
-                start = end
+                start = end + 1
 
                 print("\n")
 
@@ -643,7 +643,7 @@ class OptimalScheduler:
 
                 consumer.vbound_start = index
 
-                for hour in range(0, consumer.active_hours):
+                for hour in range(consumer.active_calendar[0], consumer.active_calendar[1] + 1):
                     varbound.append([consumer.calendar_range[0], consumer.calendar_range[1]])
                     index += 1
 
@@ -658,7 +658,7 @@ class OptimalScheduler:
                 max_discharge = energy_source.calendar_range[0]
                 max_charge = energy_source.calendar_range[1]
 
-                for hour in range(0, energy_source.active_hours):
+                for hour in range(energy_source.active_calendar[0], energy_source.active_calendar[1] + 1):
                     varbound.append([max_discharge, max_charge])
                     index += 1
 

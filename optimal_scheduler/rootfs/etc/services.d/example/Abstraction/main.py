@@ -15,7 +15,7 @@ import OptimalScheduler as optimalscheduler
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
-ha_url = "http://192.168.1.192:8123"
+ha_url = "http://192.168.0.117:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkYjcxOTI3NmM2ZTA0YzU5YTZmM2YxZmFlOTUxZWM5OSIsImlhdCI6MTcxMDg2Nzc4NywiZXhwIjoyMDI2MjI3Nzg3fQ.72uuDLPBzDVVX7enOXmDlvI-eDcQxU_wPgAeHqw6eGs"
 
 def checkConsumers(entity_ids):
@@ -147,15 +147,13 @@ if __name__ == "__main__":
         "Content-Type": "application/json",
     }
 
-    # Make a GET request to retrieve the state of the sensor
+    # Make a GET request to retrieve the states
     response = requests.get(f"{ha_url}/api/states", headers=headers) #http://supervisor/core/api/states/{sensor_entity_id} 
     
     if response.status_code == 200:
         try:
 
             entity_ids = [entity["entity_id"] for entity in response.json()] # Extract only the entity ids
-            #for entity in entity_ids:
-            #    print(entity)
 
             checkConsumers(entity_ids)
             checkGenerators(entity_ids)
