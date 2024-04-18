@@ -35,16 +35,16 @@ if request_to_api:
     data['state'] = data['state'].apply(pd.to_numeric, errors='coerce')
     data['last_updated'] = data['last_updated'].str.split('+').str[0]
     data['last_updated'] = data['last_updated'].apply(datetime.fromisoformat)
-    data['Year'] = data['last_updated'].dt.year
-    data['Month'] = data['last_updated'].dt.month
-    data['Day'] = data['last_updated'].dt.day
-    data['Hour'] = data['last_updated'].dt.hour
 
     data = data.set_index('last_updated')
     data = data.resample('1s').mean().ffill().resample('1h').mean()
     update_indices = data.index
     data['Timestamp'] = update_indices
     data = data.reset_index(drop=True, inplace=False)
+    data['Year'] = data['Timestamp'].dt.year
+    data['Month'] = data['Timestamp'].dt.month
+    data['Day'] = data['Timestamp'].dt.day
+    data['Hour'] = data['Timestamp'].dt.hour
 
     data.to_json('PVProduction.json', orient='split', compression='infer', index='true')
 
@@ -88,10 +88,10 @@ y_pred = model.predict(X_test)
 mse = mean_squared_error(y_test, y_pred)
 print("MSE: ", mse)
 
-hours = pd.to_timedelta(X_test['Hour'], unit='h')
 timestamps = pd.to_datetime(X_test[['Year', 'Month', 'Day', 'Hour']], format='%Y-%m-%d %H:%M:%S')
-plt.scatter(timestamps, y_test, color='blue', label='y_test')
-plt.scatter(timestamps, y_pred, color='orange', label='y_pred')
+plt.figure(figsize=(10, 6))
+plt.scatter(timestamps[0:100], y_test[0:100], color='blue', label='y_test', marker='.')
+plt.scatter(timestamps[0:100], y_pred[0:100], color='orange', label='y_pred', marker='.')
 plt.xlabel('X_test')
 plt.ylabel('Values')
 plt.title('Predicted production (Kwh)')
