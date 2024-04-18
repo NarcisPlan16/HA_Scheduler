@@ -73,7 +73,9 @@ data = data.drop(columns='Timestamp', axis=1)
 
 print("Preprocessing done")
 
-# TODO: Start forecasting. En llorenç m'ha recomanat passar-li "batches" de 1 dia, 1 setmana o 1 mes
+# TODO: Start forecasting. En llorenç m'ha recomanat passar-li "batches" de 1 dia, 1 setmana o 1 mes. Per fer això
+#       en llorenç m¡ha recomanat que afegeixi atributs, per tant per una instància X tindré
+#       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
 
 train_size = math.floor(len(data)*0.8)
 X_train = data.drop(columns='state', axis=1)[0:train_size]
