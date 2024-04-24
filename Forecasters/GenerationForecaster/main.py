@@ -2,7 +2,7 @@ import math
 
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -15,6 +15,56 @@ headers = {
     "Authorization": f"Bearer {bearer_token}",
     "Content-Type": "application/json",
 }
+
+
+def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
+
+    res = []
+
+    print(input_data.__len__())
+
+    for index, row in input_data.iterrows():
+        date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
+
+        if start_date <= date < end_date:
+            res.append(row)
+
+    return res, len(res)
+
+
+def GenerateNewColumns(data_dict: dict):
+    return []
+
+
+def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
+
+    grouped_instances = {}
+    index = 0
+    while index < input_data.__len__():
+
+        row = input_data.iloc[index]
+
+        start_date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
+        end_date = start_date + pd.Timedelta(timeframe)
+
+        # Find instances within the grouping interval
+        group_instances, count = GroupInstances(input_data[index:], start_date, end_date)
+        index += count
+
+        grouped_instances[start_date] = group_instances
+
+    new_columns = GenerateNewColumns(grouped_instances)
+    new_dataset = pd.DataFrame(columns=new_columns)
+    for index, group in grouped_instances.items():
+        row = []
+        for entry in group:
+            for field in entry:
+                row.append(field)
+
+        new_dataset[index] = row
+
+    return new_dataset
+
 
 ini = "2023-01-01"
 end = "2024-04-16"  # Year - month - Day
@@ -72,10 +122,15 @@ data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
 data = data.drop(columns='Timestamp', axis=1)
 
 print("Preprocessing done")
+print("Preparing data")
 
-# TODO: Start forecasting. En llorenç m'ha recomanat passar-li "batches" de 1 dia, 1 setmana o 1 mes. Per fer això
-#       en llorenç m¡ha recomanat que afegeixi atributs, per tant per una instància X tindré
+# TODO: Start forecasting. En llorenç m'ha recomanat passar-li "batches" de 1 dia, 1 setmana o 1 mes. Per fer això,
+#       m'ha recomanat que afegeixi atributs, per tant per una instància X tindré
 #       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
+
+data = PrepareBatches(data, "4D")
+
+print("Data is ready, starting training and model fit")
 
 train_size = math.floor(len(data)*0.8)
 X_train = data.drop(columns='state', axis=1)[0:train_size]
