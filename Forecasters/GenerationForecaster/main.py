@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import requests
 import pandas as pd
 from datetime import datetime, timedelta
@@ -33,7 +34,17 @@ def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
 
 
 def GenerateNewColumns(data_dict: dict):
-    return []
+
+    key, row = next(iter(data_dict.items()))
+    new_columns = []
+
+    index = 0
+    for element in row:
+        for key_name, value in element.items():
+            new_columns.append(key_name + "_" + str(index))
+        index += 1
+
+    return new_columns
 
 
 def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
@@ -61,9 +72,25 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
             for field in entry:
                 row.append(field)
 
-        new_dataset[index] = row
+        if len(row) == len(new_columns):
+            row_df = pd.DataFrame({new_columns[i]: [val] for i, val in enumerate(row)}, index=[0])
+            new_dataset = pd.concat([new_dataset, row_df], ignore_index=True)
+
+            #for n in range(len(row), len(new_columns)):
+            #    row.append(np.NaN)
 
     return new_dataset
+
+
+def SeparateXY(dataframe: pd.DataFrame):
+
+    Y_rows = [col for col in dataframe.columns if "state" in col]
+    X_data = dataframe.drop(columns=Y_rows)
+    Y_data = dataframe[Y_rows]
+
+    return X_data, Y_data
+
+
 
 
 ini = "2023-01-01"
@@ -133,10 +160,11 @@ data = PrepareBatches(data, "4D")
 print("Data is ready, starting training and model fit")
 
 train_size = math.floor(len(data)*0.8)
-X_train = data.drop(columns='state', axis=1)[0:train_size]
-y_train = data['state'][0:train_size]
-X_test = data.drop(columns='state', axis=1)[train_size:]
-y_test = data['state'][train_size:]
+data_X, data_y = SeparateXY(data)
+X_train = data_X[0:train_size]
+y_train = data_y[0:train_size]
+X_test = data_X[train_size:]
+y_test = data_y[train_size:]
 
 model = RandomForestRegressor(n_estimators=200, max_depth=16, random_state=0, n_jobs=4)
 model.fit(X_train, y_train)
