@@ -3,11 +3,11 @@ import math
 import numpy as np
 import requests
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 ha_url = "http://192.168.0.110:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
@@ -24,11 +24,14 @@ def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
 
     print(input_data.__len__())
 
-    for index, row in input_data.iterrows():
-        date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
+    date = start_date
+    index = 0
+    while start_date <= date <= end_date and index < input_data.__len__():
 
-        if start_date <= date < end_date:
-            res.append(row)
+        row = input_data.iloc[index]
+        res.append(row)
+        date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
+        index += 1
 
     return res, len(res)
 
@@ -93,7 +96,7 @@ def SeparateXY(dataframe: pd.DataFrame):
 
 
 
-ini = "2023-01-01"
+ini = "2022-01-01"
 end = "2024-04-16"  # Year - month - Day
 request_to_api = False
 if request_to_api:
@@ -155,9 +158,25 @@ print("Preparing data")
 #       m'ha recomanat que afegeixi atributs, per tant per una instància X tindré
 #       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
 
-data = PrepareBatches(data, "4D")
+#data = PrepareBatches(data, "7D")
 
 print("Data is ready, starting training and model fit")
+
+sns.set_theme(style="white")
+corr = data.corr()
+mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
+
+f, ax = plt.subplots(figsize=(14, 12))
+cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
+
+# Draw the heatmap with the mask and correct aspect ratio
+heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+plt.show()
+
+fig = heatmap.get_figure()
+fig.savefig("correlation_matrix.png")
 
 train_size = math.floor(len(data)*0.8)
 data_X, data_y = SeparateXY(data)
@@ -166,19 +185,24 @@ y_train = data_y[0:train_size]
 X_test = data_X[train_size:]
 y_test = data_y[train_size:]
 
-model = RandomForestRegressor(n_estimators=200, max_depth=16, random_state=0, n_jobs=4)
+print("Dataset instances: " + str(data.shape[0]))
+print("Dataset attributes: " + str(data.shape[1]))
+model = RandomForestRegressor(n_estimators=int(data.shape[0]*0.4), max_depth=int(data.shape[1]*0.5), random_state=0, n_jobs=4, verbose=True)
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 mse = mean_squared_error(y_test, y_pred)
 print("MSE: ", mse)
+mape = mean_absolute_percentage_error(y_test, y_pred)
+print("MAPE: ", mape)
 
-timestamps = pd.to_datetime(X_test[['Year', 'Month', 'Day', 'Hour']], format='%Y-%m-%d %H:%M:%S')
-plt.figure(figsize=(10, 6))
-plt.scatter(timestamps[0:100], y_test[0:100], color='blue', label='y_test', marker='.')
-plt.scatter(timestamps[0:100], y_pred[0:100], color='orange', label='y_pred', marker='.')
-plt.xlabel('X_test')
-plt.ylabel('Values')
-plt.title('Predicted production (Kwh)')
-plt.legend()
-plt.show()
+#timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
+#plt.figure(figsize=(10, 6))
+#x = [i for i in range(0, 76)]
+#plt.scatter(x, y_test, color='blue', label='y_test', marker='.')
+#plt.scatter(x, y_pred, color='orange', label='y_pred', marker='.')
+#plt.xlabel('X_test')
+#plt.ylabel('Values')
+#plt.title('Predicted production (Kwh)')
+#plt.legend()
+#plt.show()
