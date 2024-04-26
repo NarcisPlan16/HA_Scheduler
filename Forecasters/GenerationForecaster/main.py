@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
+from sklearn.model_selection import cross_val_score, cross_val_predict
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -26,7 +27,7 @@ def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
 
     date = start_date
     index = 0
-    while start_date <= date <= end_date and index < input_data.__len__():
+    while start_date <= date < end_date and index < input_data.__len__():
 
         row = input_data.iloc[index]
         res.append(row)
@@ -59,7 +60,7 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
         row = input_data.iloc[index]
 
         start_date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
-        end_date = start_date + pd.Timedelta(timeframe)
+        end_date = start_date + pd.Timedelta(timeframe) - pd.Timedelta("1h")
 
         # Find instances within the grouping interval
         group_instances, count = GroupInstances(input_data[index:], start_date, end_date)
@@ -197,15 +198,9 @@ else:
 print("Preprocessing done")
 print("Preparing data")
 
-# TODO: Start forecasting. En llorenç m'ha recomanat passar-li "batches" de 1 dia, 1 setmana o 1 mes. Per fer això,
-#       m'ha recomanat que afegeixi atributs, per tant per una instància X tindré
-#       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
-
+data_batches, n_per_batch = PrepareBatches(data, "1D")
 corr_matrix = CalcCorrMatrix(data, False)
-data_batches, n_per_batch = PrepareBatches(data, "3D")
 data = CleanByCorrelation(corr_matrix, data_batches)
-print(data.corr())
-# TODO: MIRAR SI VAL MÉS LA PENA ELIMINAR ELS ATRIBUTS ARA O ABANS DE FER ELS BATCHES. O BÉ LES DUES
 
 print("Data is ready, starting training and model fit")
 
@@ -221,7 +216,7 @@ print("Dataset instances: " + str(data.shape[0]))
 print("Dataset attributes: " + str(data.shape[1]))
 print("Total hour instances: " + str(total_hours))
 print(X_train.head())
-model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=int(X_train.shape[1]*0.7), random_state=0, n_jobs=4, verbose=True)
+model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=int(X_train.shape[1]*0.7), random_state=0, n_jobs=-1, verbose=True)
 print(model)
 model.fit(X_train, y_train)
 
@@ -233,12 +228,20 @@ print("MAPE: ", mape)
 r2 = r2_score(y_test, y_pred)
 print("R2 score: ", r2)
 
+print("----------------------Now trying with cross validation----------------------")
+y_pred = cross_val_predict(model, X_train, y_train, cv=5, n_jobs=-1) # 328
+mse = mean_squared_error(y_test, y_pred)  # TODO: y_pred te size 328 x n_atributs que és 5*82 (82 és el nombre d'instàncies d'y_test)
+print("MSE: ", mse)
+mape = mean_absolute_percentage_error(y_test, y_pred)
+print("MAPE: ", mape)
+r2 = r2_score(y_test, y_pred)
+print("R2 score: ", r2)
+
 #timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
-print(y_test.head())
 plt.figure(figsize=(10, 6))
-x = [i for i in range(0, y_test[0:1].size)]
-plt.scatter(x, y_test[0:1], color='blue', label='y_test', marker='.')
-plt.scatter(x, y_pred[0:1], color='orange', label='y_pred', marker='.')
+x = [i for i in range(0, y_test[0:6].size)]
+plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
+plt.scatter(x, y_pred[0:6], color='orange', label='y_pred', marker='.')
 plt.xlabel('X_test')
 plt.ylabel('PV Production')
 plt.title('Predicted production (Kwh)')
