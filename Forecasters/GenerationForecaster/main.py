@@ -5,7 +5,7 @@ import requests
 import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -94,6 +94,40 @@ def SeparateXY(dataframe: pd.DataFrame):
     return X_data, Y_data
 
 
+def CalcCorrMatrix(dataset: pd.DataFrame):
+
+    sns.set_theme(style="white")
+    corr = dataset.corr()
+    mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
+
+    f, ax = plt.subplots(figsize=(14, 12))
+    cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+                          square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+    plt.show()
+
+    fig = heatmap.get_figure()
+    fig.savefig("correlation_matrix.png")
+
+    return corr
+
+
+def CleanByCorrelation(corr_mat, dataset: pd.DataFrame):
+
+    columns_to_remove = corr_mat.index[((corr_mat["state"] < 0.2) &
+                                        (corr_mat["state"] > -0.2)) & (corr_mat.index != "state")]
+
+    selected_columns = []
+    for col in dataset.columns:
+        if not any(exclude_str in col for exclude_str in columns_to_remove):
+            selected_columns.append(col)
+
+    df_filtered = dataset[selected_columns]
+
+    return df_filtered
 
 
 ini = "2022-01-01"
@@ -138,18 +172,23 @@ else:
 # Add the weather forecast. Lat and lon of UdG p4's building
 lat = "41.963138"
 lon = "2.831640"
-url = f"https://archive-api.open-meteo.com/v1/era5?latitude={lat}&longitude={lon}&start_date={ini}&end_date={end}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
-response = requests.get(url).json()
-meteo_data = pd.DataFrame(response['hourly'])
-meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
+if request_to_api:
+    url = f"https://archive-api.open-meteo.com/v1/era5?latitude={lat}&longitude={lon}&start_date={ini}&end_date={end}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+    response = requests.get(url).json()
+    meteo_data = pd.DataFrame(response['hourly'])
+    meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
 
-data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-data['Timestamp'] = data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
-meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    data['Timestamp'] = pd.to_datetime(data['Timestamp'])
+    data['Timestamp'] = data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
+    meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
-data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
-data = data.drop(columns='Timestamp', axis=1)
+    data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
+    data = data.drop(columns='Timestamp', axis=1)
+
+    data.to_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer', index=True)
+else:
+    data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
 
 print("Preprocessing done")
 print("Preparing data")
@@ -158,25 +197,11 @@ print("Preparing data")
 #       m'ha recomanat que afegeixi atributs, per tant per una instància X tindré
 #       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
 
-#data = PrepareBatches(data, "7D")
+corr_matrix = CalcCorrMatrix(data)
+data_batches = PrepareBatches(data, "3D")
+data = CleanByCorrelation(corr_matrix, data_batches)
 
 print("Data is ready, starting training and model fit")
-
-sns.set_theme(style="white")
-corr = data.corr()
-mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
-
-f, ax = plt.subplots(figsize=(14, 12))
-cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
-
-# Draw the heatmap with the mask and correct aspect ratio
-heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
-            square=True, linewidths=.5, cbar_kws={"shrink": .5})
-
-plt.show()
-
-fig = heatmap.get_figure()
-fig.savefig("correlation_matrix.png")
 
 train_size = math.floor(len(data)*0.8)
 data_X, data_y = SeparateXY(data)
@@ -187,7 +212,8 @@ y_test = data_y[train_size:]
 
 print("Dataset instances: " + str(data.shape[0]))
 print("Dataset attributes: " + str(data.shape[1]))
-model = RandomForestRegressor(n_estimators=int(data.shape[0]*0.4), max_depth=int(data.shape[1]*0.5), random_state=0, n_jobs=4, verbose=True)
+model = RandomForestRegressor(n_estimators=int(data.shape[0]*0.3), max_depth=int(data.shape[1]*0.7), random_state=0, n_jobs=4, verbose=True)
+print(model)
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
@@ -195,14 +221,16 @@ mse = mean_squared_error(y_test, y_pred)
 print("MSE: ", mse)
 mape = mean_absolute_percentage_error(y_test, y_pred)
 print("MAPE: ", mape)
+r2 = r2_score(y_test, y_pred)
+print("R2 score: ", r2)
 
 #timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
-#plt.figure(figsize=(10, 6))
-#x = [i for i in range(0, 76)]
-#plt.scatter(x, y_test, color='blue', label='y_test', marker='.')
-#plt.scatter(x, y_pred, color='orange', label='y_pred', marker='.')
-#plt.xlabel('X_test')
-#plt.ylabel('Values')
-#plt.title('Predicted production (Kwh)')
-#plt.legend()
-#plt.show()
+plt.figure(figsize=(10, 6))
+x = [i for i in range(0, y_test[0:1].size)]
+plt.scatter(x, y_test[0:1], color='blue', label='y_test', marker='.')
+plt.scatter(x, y_pred[0:1], color='orange', label='y_pred', marker='.')
+plt.xlabel('X_test')
+plt.ylabel('PV Production')
+plt.title('Predicted production (Kwh)')
+plt.legend()
+plt.show()
