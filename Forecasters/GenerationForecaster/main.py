@@ -67,6 +67,9 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
 
         grouped_instances[start_date] = group_instances
 
+    first_key = next(iter(grouped_instances))
+    n_instances_batch = grouped_instances[first_key].__len__()
+
     new_columns = GenerateNewColumns(grouped_instances)
     new_dataset = pd.DataFrame(columns=new_columns)
     for index, group in grouped_instances.items():
@@ -82,7 +85,7 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
             #for n in range(len(row), len(new_columns)):
             #    row.append(np.NaN)
 
-    return new_dataset
+    return new_dataset, n_instances_batch
 
 
 def SeparateXY(dataframe: pd.DataFrame):
@@ -94,23 +97,24 @@ def SeparateXY(dataframe: pd.DataFrame):
     return X_data, Y_data
 
 
-def CalcCorrMatrix(dataset: pd.DataFrame):
+def CalcCorrMatrix(dataset: pd.DataFrame, display: bool):
 
-    sns.set_theme(style="white")
     corr = dataset.corr()
-    mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
+    if display:
+        sns.set_theme(style="white")
+        mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
 
-    f, ax = plt.subplots(figsize=(14, 12))
-    cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
+        f, ax = plt.subplots(figsize=(14, 12))
+        cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
 
-    # Draw the heatmap with the mask and correct aspect ratio
-    heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
-                          square=True, linewidths=.5, cbar_kws={"shrink": .5})
+        # Draw the heatmap with the mask and correct aspect ratio
+        heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+                              square=True, linewidths=.5, cbar_kws={"shrink": .5})
 
-    plt.show()
+        plt.show()
 
-    fig = heatmap.get_figure()
-    fig.savefig("correlation_matrix.png")
+        fig = heatmap.get_figure()
+        fig.savefig("correlation_matrix.png")
 
     return corr
 
@@ -197,9 +201,11 @@ print("Preparing data")
 #       m'ha recomanat que afegeixi atributs, per tant per una instància X tindré
 #       X_dia1_hora:18h, X_dia1_hora19h, ..., X_dia2_hora11h
 
-corr_matrix = CalcCorrMatrix(data)
-data_batches = PrepareBatches(data, "3D")
+corr_matrix = CalcCorrMatrix(data, False)
+data_batches, n_per_batch = PrepareBatches(data, "3D")
 data = CleanByCorrelation(corr_matrix, data_batches)
+print(data.corr())
+# TODO: MIRAR SI VAL MÉS LA PENA ELIMINAR ELS ATRIBUTS ARA O ABANS DE FER ELS BATCHES. O BÉ LES DUES
 
 print("Data is ready, starting training and model fit")
 
@@ -210,9 +216,12 @@ y_train = data_y[0:train_size]
 X_test = data_X[train_size:]
 y_test = data_y[train_size:]
 
+total_hours = n_per_batch * data.shape[0]
 print("Dataset instances: " + str(data.shape[0]))
 print("Dataset attributes: " + str(data.shape[1]))
-model = RandomForestRegressor(n_estimators=int(data.shape[0]*0.3), max_depth=int(data.shape[1]*0.7), random_state=0, n_jobs=4, verbose=True)
+print("Total hour instances: " + str(total_hours))
+print(X_train.head())
+model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=int(X_train.shape[1]*0.7), random_state=0, n_jobs=4, verbose=True)
 print(model)
 model.fit(X_train, y_train)
 
@@ -225,6 +234,7 @@ r2 = r2_score(y_test, y_pred)
 print("R2 score: ", r2)
 
 #timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
+print(y_test.head())
 plt.figure(figsize=(10, 6))
 x = [i for i in range(0, y_test[0:1].size)]
 plt.scatter(x, y_test[0:1], color='blue', label='y_test', marker='.')
