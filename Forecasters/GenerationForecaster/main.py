@@ -7,6 +7,7 @@ from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 from sklearn.model_selection import cross_val_score, cross_val_predict
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -135,6 +136,17 @@ def CleanByCorrelation(corr_mat, dataset: pd.DataFrame):
     return df_filtered
 
 
+def display(results):
+
+    print(f'Best parameters are: {results.best_params_}')
+    print("\n")
+    mean_score = results.cv_results_['mean_test_score']
+    std_score = results.cv_results_['std_test_score']
+    params = results.cv_results_['params']
+    for mean, std, params in zip(mean_score,std_score,params):
+        print(f'{round(mean,3)} + or -{round(std,3)} for the {params}')
+
+
 ini = "2022-01-01"
 end = "2024-04-16"  # Year - month - Day
 request_to_api = False
@@ -216,7 +228,20 @@ print("Dataset instances: " + str(data.shape[0]))
 print("Dataset attributes: " + str(data.shape[1]))
 print("Total hour instances: " + str(total_hours))
 print(X_train.head())
-model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=int(X_train.shape[1]*0.7), random_state=0, n_jobs=-1, verbose=True)
+
+parameters = {
+    "n_estimators": [int(total_hours*0.1), int(total_hours*0.2), int(total_hours*0.4),
+                     int(total_hours*0.6), int(total_hours*0.8)],
+    "max_depth": [int(X_train.shape[1]*0.2), int(X_train.shape[1]*0.4),
+                  int(X_train.shape[1]*0.6), int(X_train.shape[1]*0.8), None]
+}
+#model = RandomForestRegressor()
+#cv = GridSearchCV(model, parameters, cv=2, n_jobs=-1, verbose=True)
+#cv.fit(X_train, y_train)
+
+#display(cv)
+
+model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=None, random_state=0, n_jobs=-1, verbose=False)
 print(model)
 model.fit(X_train, y_train)
 
@@ -228,16 +253,8 @@ print("MAPE: ", mape)
 r2 = r2_score(y_test, y_pred)
 print("R2 score: ", r2)
 
-print("----------------------Now trying with cross validation----------------------")
-y_pred = cross_val_predict(model, X_train, y_train, cv=5, n_jobs=-1) # 328
-mse = mean_squared_error(y_test, y_pred)  # TODO: y_pred te size 328 x n_atributs que és 5*82 (82 és el nombre d'instàncies d'y_test)
-print("MSE: ", mse)
-mape = mean_absolute_percentage_error(y_test, y_pred)
-print("MAPE: ", mape)
-r2 = r2_score(y_test, y_pred)
-print("R2 score: ", r2)
 
-#timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
+# timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
 plt.figure(figsize=(10, 6))
 x = [i for i in range(0, y_test[0:6].size)]
 plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
