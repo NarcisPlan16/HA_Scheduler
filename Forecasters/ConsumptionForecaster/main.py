@@ -232,32 +232,32 @@ parameters = {
     "max_depth": [int(X_train.shape[1]*0.2), int(X_train.shape[1]*0.4),
                   int(X_train.shape[1]*0.6), int(X_train.shape[1]*0.8), None]
 }
-model = RandomForestRegressor()
-cv = GridSearchCV(model, parameters, cv=3, n_jobs=-1, verbose=True, scoring='r2')
-cv.fit(X_train, y_train)
+#model = RandomForestRegressor()
+#cv = GridSearchCV(model, parameters, cv=2, n_jobs=-1, verbose=True, scoring='r2')
+#cv.fit(X_train, y_train)
 
-display(cv)
+#display(cv)
 
-#model = RandomForestRegressor(n_estimators=int(total_hours*0.1), max_depth=int(X_train.shape[1]*0.5), random_state=0, n_jobs=-1, verbose=False)
-#print(model)
-#model.fit(X_train, y_train)
+model = RandomForestRegressor(n_estimators=int(total_hours*0.1), max_depth=int(X_train.shape[1]*0.5), random_state=0, n_jobs=-1, verbose=False)
+print(model)
+model.fit(X_train, y_train)
 
-#y_pred = model.predict(X_test)
-#mse = mean_squared_error(y_test, y_pred)
-#print("MSE: ", mse)
-#mape = mean_absolute_percentage_error(y_test, y_pred)
-#print("MAPE: ", mape)
-#r2 = r2_score(y_test, y_pred)
-#print("R2 score: ", r2)
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+print("MSE: ", mse)
+mape = mean_absolute_percentage_error(y_test, y_pred)
+print("MAPE: ", mape)
+r2 = r2_score(y_test, y_pred)
+print("R2 score: ", r2)
 
 
 # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
-#plt.figure(figsize=(10, 6))
-#x = [i for i in range(0, y_test[0:6].size)]
-#plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
-#plt.scatter(x, y_pred[0:6], color='orange', label='y_pred', marker='.')
-#plt.xlabel('Hours')
-#plt.ylabel('Consumption')
-#plt.title('Predicted consumption (Kwh)')
-#plt.legend()
-#plt.show()
+plt.figure(figsize=(10, 6))
+x = [i for i in range(0, y_test[0:6].size)]
+plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
+plt.scatter(x, y_pred[0:6], color='orange', label='y_pred', marker='.')
+plt.xlabel('Hours')
+plt.ylabel('Consumption')
+plt.title('Predicted consumption (Kwh)')
+plt.legend()
+plt.show()
