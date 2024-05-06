@@ -210,6 +210,7 @@ print("Preparing data")
 data_batches, n_per_batch = PrepareBatches(data, "1D")
 corr_matrix = CalcCorrMatrix(data, False)
 data = CleanByCorrelation(corr_matrix, data_batches)
+print(data.describe())
 
 print("Data is ready, starting training and model fit")
 
