@@ -2,13 +2,16 @@
 import math
 import time
 import json
-
 import psutil
 import copy
 import os
+import requests
 import numpy as np
+import ProdForecaster
+import ConsForecaster
+
 #import matplotlib.pyplot as plt
-# import cProfile # Uncomment for debug
+#import cProfile # Uncomment for debug
 #import pyswarms as ps
 #import pyswarms.backend.topology as ps_tp
 
@@ -20,7 +23,7 @@ from Asset_types.Consumers.HidrogenStation.HidrogenStation import HidrogenStatio
 from Configurator import Configurator
 #from scipy.optimize import differential_evolution, dual_annealing, direct, brute, Bounds
 from geneticalgorithm.geneticalgorithm import geneticalgorithm
-
+from datetime import datetime, timedelta
 
 class OptimalScheduler:
 
@@ -38,11 +41,13 @@ class OptimalScheduler:
         self.hidrogen_price = 1.6
         self.consumer_invalid_solutions = 0  # Total invalid solution for the consumers, just for debug purposes
 
-        self.electricity_prices = [0.133, 0.126, 0.128, 0.141, 0.147, 0.148, 0.155, 0.156, 0.158, 0.152, 0.147, 0.148,
-                                   0.144, 0.141, 0.139, 0.136, 0.134, 0.137, 0.143, 0.152, 0.157, 0.164, 0.159, 0.156]
+        self.electricity_prices = self.__obtainElectricityPrices()
 
         self.electricity_sell_prices = [0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054,
                                         0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054]
+        
+        self.electrcity_production_forecast = ProdForecaster.Start()
+        self.electricity_consumption_forecast = ConsForecaster.Start()
 
         self.solucio_run = Solution()
         self.solucio_final = Solution()
@@ -53,6 +58,32 @@ class OptimalScheduler:
         self.kwargs_for_simulating = {}
         # key arguments for those assets that share a common restriction and
         # one execution effects the others assets execution
+
+    def __obtainElectricityPrices():
+        
+        tomorrow = datetime.today() + timedelta(1)
+        tomorrow_str = tomorrow.strftime('%Y%m%d')
+        url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
+
+
+        response = requests.get(url)
+        if response.status_code != "200":
+            today = datetime.today().strftime('%Y%m%d')
+            url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{today}.1"
+            response = requests.get(url)
+
+        with open("omie_price_pred.csv", 'wb') as f:
+            f.write(response.content)
+
+        hourly_prices = []
+        with open('omie_price_pred.csv', 'r') as file:
+            for line in file.readlines()[1:-1]:
+                components = line.strip().split(';')
+                components.pop(-1) # delete blank character at the end
+                hourly_price = float(components[-1])
+                hourly_prices.append(hourly_price)
+
+        return hourly_prices
 
     def __optimize(self):
 

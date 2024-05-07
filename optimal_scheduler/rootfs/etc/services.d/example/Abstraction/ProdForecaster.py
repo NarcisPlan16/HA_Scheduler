@@ -1,14 +1,15 @@
 import math
-import requests
+
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import requests
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.model_selection import GridSearchCV
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 ha_url = "http://192.168.0.110:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
@@ -122,8 +123,8 @@ def CalcCorrMatrix(dataset: pd.DataFrame, display: bool):
 
 def CleanByCorrelation(corr_mat, dataset: pd.DataFrame):
 
-    columns_to_remove = corr_mat.index[((corr_mat["state"] < 0.3) &
-                                        (corr_mat["state"] > -0.3)) & (corr_mat.index != "state")]
+    columns_to_remove = corr_mat.index[((corr_mat["state"] < 0.2) &
+                                        (corr_mat["state"] > -0.2)) & (corr_mat.index != "state")]
 
     selected_columns = []
     for col in dataset.columns:
@@ -142,19 +143,19 @@ def display(results):
     mean_score = results.cv_results_['mean_test_score']
     std_score = results.cv_results_['std_test_score']
     params = results.cv_results_['params']
-    for mean, std, params in zip(mean_score, std_score, params):
-        print(f'{round(mean, 3)} + or -{round(std, 3)} for the {params}')
+    for mean, std, params in zip(mean_score,std_score,params):
+        print(f'{round(mean,3)} + or -{round(std,3)} for the {params}')
 
 
-ini = "2024-01-01"
-end = "2024-06-01"  # Year - month - Day
+ini = "2022-01-01"
+end = "2024-04-16"  # Year - month - Day
 request_to_api = False
 
 def Start():
+
     if request_to_api:
 
-        entity = "sensor.sonnenbatterie_79259_consumption_w"
-        # o bé sumar els grocs i vermells de la visualització principal. CONSUM_PLACA_A_LO_51, ...
+        entity = "sensor.sonnenbatterie_79259_meter_production_4_1_w_total"
         response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T00:00:00&filter_entity_id="+entity, headers=headers)
 
         response_data = response.json()[0]
@@ -179,10 +180,14 @@ def Start():
         data['Day'] = data['Timestamp'].dt.day
         data['Hour'] = data['Timestamp'].dt.hour
 
-        data.to_json('LABConsumption.json', orient='split', compression='infer', index='true')
+        data.to_json('PVProduction.json', orient='split', compression='infer', index='true')
 
     else:
-        data = pd.read_json('LABConsumption.json', orient='split', compression='infer')
+        data = pd.read_json('PVProduction.json', orient='split', compression='infer')
+
+    #print(data)
+    #data[0:72].plot()
+    #plt.show()
 
     # Add the weather forecast. Lat and lon of UdG p4's building
     lat = "41.963138"
@@ -208,19 +213,9 @@ def Start():
     print("Preprocessing done")
     print("Preparing data")
 
-    #Q1 = np.percentile(data['state'], 25)
-    #Q3 = np.percentile(data['state'], 75)
-    #IQR = Q3 - Q1
-
-    #lower_bound = Q1 - 1.5 * IQR
-    #upper_bound = Q3 + 1.5 * IQR
-
-    #data = data[(data['state'] > lower_bound) & (data['state'] < upper_bound)]
-
     data_batches, n_per_batch = PrepareBatches(data, "1D")
     corr_matrix = CalcCorrMatrix(data, False)
     data = CleanByCorrelation(corr_matrix, data_batches)
-    print(data.describe())
 
     print("Data is ready, starting training and model fit")
 
@@ -239,17 +234,17 @@ def Start():
 
     parameters = {
         "n_estimators": [int(total_hours*0.1), int(total_hours*0.2), int(total_hours*0.4),
-                         int(total_hours*0.6), int(total_hours*0.8)],
-        "max_depth": [int(X_train.shape[1]*0.1), int(X_train.shape[1]*0.2), int(X_train.shape[1]*0.4),
-                      int(X_train.shape[1]*0.6), int(X_train.shape[1]*0.8), None]
+                        int(total_hours*0.6), int(total_hours*0.8)],
+        "max_depth": [int(X_train.shape[1]*0.2), int(X_train.shape[1]*0.4),
+                    int(X_train.shape[1]*0.6), int(X_train.shape[1]*0.8), None]
     }
     #model = RandomForestRegressor()
-    #cv = GridSearchCV(model, parameters, cv=5, n_jobs=-1, verbose=True, scoring='r2')
+    #cv = GridSearchCV(model, parameters, cv=2, n_jobs=-1, verbose=True)
     #cv.fit(X_train, y_train)
 
     #display(cv)
 
-    model = RandomForestRegressor(n_estimators=int(total_hours*0.1), max_depth=int(X_train.shape[1]*0.5), random_state=0, n_jobs=-1, verbose=False)
+    model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=None, random_state=0, n_jobs=-1, verbose=False)
     print(model)
     model.fit(X_train, y_train)
 
@@ -261,46 +256,16 @@ def Start():
     r2 = r2_score(y_test, y_pred)
     print("R2 score: ", r2)
 
+
     # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
     plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_test.size)]
-    plt.scatter(x, y_test, color='blue', label='Real', marker='.')
-    plt.scatter(x, y_pred, color='orange', label='Predicted', marker='.')
-    plt.xlabel('Hours')
-    plt.ylabel('Consumption')
-    plt.title('Predicted consumption (Kwh)')
+    x = [i for i in range(0, y_test[0:6].size)]
+    plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
+    plt.scatter(x, y_pred[0:6], color='orange', label='y_pred', marker='.')
+    plt.xlabel('X_test')
+    plt.ylabel('PV Production')
+    plt.title('Predicted production (Kwh)')
     plt.legend()
     plt.show()
 
-    plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_train.size)]
-    plt.scatter(x, y_train, color='blue', label='y_train', marker='.')
-    plt.xlabel('Hours')
-    plt.ylabel('Consumption data (Kwh)')
-    plt.show()
-
     return y_pred
-
-
-tomorrow = datetime.today() + timedelta(1)
-tomorrow_str = tomorrow.strftime('%Y%m%d')
-url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
-
-response = requests.get(url)
-if response.status_code != "200":
-    today = datetime.today().strftime('%Y%m%d')
-    url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{today}.1"
-    response = requests.get(url)
-
-with open("omie_price_pred.csv", 'wb') as f:
-    f.write(response.content)
-
-hourly_prices = []
-with open('omie_price_pred.csv', 'r') as file:
-    for line in file.readlines()[1:-1]:
-        components = line.strip().split(';')
-        components.pop(-1)  # delete blank character at the end
-        hourly_price = float(components[-1])
-        hourly_prices.append(hourly_price)
-
-print(hourly_prices)

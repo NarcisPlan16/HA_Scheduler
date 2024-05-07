@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 from sklearn.model_selection import cross_val_score, cross_val_predict
@@ -261,6 +261,7 @@ def Start():
     r2 = r2_score(y_test, y_pred)
     print("R2 score: ", r2)
 
+
     # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
     plt.figure(figsize=(10, 6))
     x = [i for i in range(0, y_test.size)]
@@ -280,27 +281,3 @@ def Start():
     plt.show()
 
     return y_pred
-
-
-tomorrow = datetime.today() + timedelta(1)
-tomorrow_str = tomorrow.strftime('%Y%m%d')
-url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
-
-response = requests.get(url)
-if response.status_code != "200":
-    today = datetime.today().strftime('%Y%m%d')
-    url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{today}.1"
-    response = requests.get(url)
-
-with open("omie_price_pred.csv", 'wb') as f:
-    f.write(response.content)
-
-hourly_prices = []
-with open('omie_price_pred.csv', 'r') as file:
-    for line in file.readlines()[1:-1]:
-        components = line.strip().split(';')
-        components.pop(-1)  # delete blank character at the end
-        hourly_price = float(components[-1])
-        hourly_prices.append(hourly_price)
-
-print(hourly_prices)
