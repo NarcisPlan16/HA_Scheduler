@@ -1,5 +1,10 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
+## 4.5
+- Started the implementation of the foprecasters
+- Started refactoring the generators
+- Test version only
+
 ## 4.0
 - The addon works!! Many improvements are needed in order to work correctly but with this update we've proved our theory that it can be done. (It will work better or worse but at least is viable).
 

@@ -40,6 +40,7 @@ class OptimalScheduler:
         self.hores_simular = 24
         self.hidrogen_price = 1.6
         self.consumer_invalid_solutions = 0  # Total invalid solution for the consumers, just for debug purposes
+        self.generator_invalid_solutions = 0
 
         self.electricity_prices = self.__obtainElectricityPrices()
 
@@ -597,13 +598,16 @@ class OptimalScheduler:
         if len(consumers_total_profile) < self.hores_simular:  # solucio no valida
             # si hem simulat menys de les hores demanades, vol dir que la solució no és vàlida
             self.consumer_invalid_solutions += 1
-            return [], (9999999999999 - (
-                        valid_ones * 100) + cost_aproximacio), total_hidrogen_kg, valid_ones + 1, {}, {}, []
-            # (9999999999999 - valid_ones len(consumption_profile) + cost_aproximacio) és la manera de quantificar
-            # si hi havia alguna configuracio d'algun asset bona i com de bona és
+            return [], (9999999999999 - (valid_ones * 100) + cost_aproximacio), total_hidrogen_kg, valid_ones + 1, {}, {}, []
 
         # kwh produits pels generators
-        generators_total_profile, generators_individual_profile, generators_total_kwh = self.__calcGeneratorsBalance()
+        generators_total_profile, generators_individual_profile, generators_total_kwh, gen_valids, \
+            cost_aproximacio_gen = self.__calcGeneratorsBalance(configuracio)
+        
+        if len(generators_total_profile) < self.hores_simular:  # solucio no valida
+            self.generator_invalid_solutions += 1
+            return [], (9999999999999 - (valid_ones * 10) - (gen_valids * 10) + cost_aproximacio + cost_aproximacio_gen), \
+                total_hidrogen_kg, (valid_ones + gen_valids + 1), {}, {}, []
 
         # Add the building consuming costs
         for building_class_list in self.solucio_run.buildings.values():  # get of assets of each buildings class
@@ -620,11 +624,11 @@ class OptimalScheduler:
             cost_aproximacio_bat, es_states = self.__calcEnergySourcesBalance(configuracio, balanc_energetic_per_hores)
 
         if len(balanc_energetic_per_hores) < 24:
-            return [], (9999999999999 - (valid_ones * 10) - (bat_valids * 10) + cost_aproximacio +
-                        cost_aproximacio_bat), total_hidrogen_kg, (valid_ones + 1 + bat_valids), {}, {}, []
+            return [], (9999999999999 - (valid_ones * 10) - (bat_valids * 10) - (gen_valids * 10) + cost_aproximacio + \
+                cost_aproximacio_gen + cost_aproximacio_bat), total_hidrogen_kg, (valid_ones + gen_valids + bat_valids + 1), {}, {}, []
 
-        return balanc_energetic_per_hores, cost_aproximacio + cost_aproximacio_bat, total_hidrogen_kg, \
-            (valid_ones + bat_valids), consumers_individual_profile, generators_individual_profile, es_states
+        return balanc_energetic_per_hores, (cost_aproximacio + cost_aproximacio_gen+ cost_aproximacio_bat), total_hidrogen_kg, \
+            (valid_ones + gen_valids + bat_valids), consumers_individual_profile, generators_individual_profile, es_states
 
     def mostrarResultat(self, temps):
 

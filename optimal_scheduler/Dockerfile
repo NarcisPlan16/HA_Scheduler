@@ -14,6 +14,8 @@ RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
 COPY config.yaml config.yaml
 
-RUN pip install psutil func_timeout requests numpy
+RUN apk update && apk add --no-cache build-base
+RUN pip install psutil func_timeout requests numpy pandas
+RUN pip install scikit-learn
 #CAUSE PROBLEMS: scipy pyswarms
 
