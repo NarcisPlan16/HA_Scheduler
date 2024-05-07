@@ -17,7 +17,7 @@ import ConsForecaster
 
 from Solution import Solution
 from AbsConsumer import AbsConsumer
-from Generator import Generator
+from AbsGenerator import AbsGenerator
 from AbsEnergySource import AbsEnergySource
 from Asset_types.Consumers.HidrogenStation.HidrogenStation import HidrogenStation
 from Configurator import Configurator
@@ -492,28 +492,55 @@ class OptimalScheduler:
 
         return consumers_total_profile, consumers_individual_profile, consumers_total_kwh, numero_de_consumer, cost_aproximacio, total_hidrogen_kg
 
-    def __calcGeneratorsBalance(self):
+    def __calcGeneratorsBalance(self, config):
         # funcio per calcular el nou balanç energetic tenint en compte el que generen els generadors
 
         self.kwargs_for_simulating.clear()
 
-        generator: Generator
+        generator: AbsGenerator
         generators_total_kwh = 0
         generators_total_profile = [0] * self.hores_simular
         generators_individual_profile = {}
+        cost_aproximacio = 0
+        numero_de_generator = 0
 
         for generator_class in self.solucio_run.generators:  # per cada classe de generador
             for generator in self.solucio_run.generators[generator_class].values():  # per cada generador
 
-                generators_total_kwh += generator.obtainDailyProduction()
-                for i in range(0, len(generators_total_profile)):  # per cada hora
-                    generators_total_profile[i] += generator.obtainProductionByHour(i)
+                if not generator.controllable:
+                    generators_total_kwh += generator.obtainDailyProduction()
+                    for i in range(0, len(generators_total_profile)):  # per cada hora
+                        generators_total_profile[i] += generator.obtainProductionByHour(i)
 
-                generators_individual_profile[generator.name] = generator.obtainProduction()
+                    generators_individual_profile[generator.name] = generator.obtainProduction()
+
+                else:
+
+                    res_dictionary = generator.doSimula(calendar=config[generator.vbound_start: generator.vbound_end],
+                                                        kwargs_simulation=self.kwargs_for_simulating)
+                    
+                    production_profile, produced_Kwh, _, cost = self.__unpackSimulationResults(res_dictionary)
+                    generators_total_kwh += produced_Kwh
+                    cost_aproximacio += cost
+
+                    if len(production_profile) < self.hores_simular:  # solucio no vàlida
+
+                        generators_total_profile.pop()  # per dir que la solucio no és vàlida
+                        self.kwargs_for_simulating.clear()
+
+                        return generators_total_profile, generators_individual_profile, generators_total_kwh,  numero_de_generator, \
+                                cost_aproximacio
+
+                    generators_individual_profile[generator.name] = production_profile
+
+                    for i in range(0, len(generators_total_profile)):  # per cada hora
+                        generators_total_profile[i] += production_profile[i]
+
+                numero_de_generator += 1
 
         self.kwargs_for_simulating.clear()
 
-        return generators_total_profile, generators_individual_profile, generators_total_kwh
+        return generators_total_profile, generators_individual_profile, generators_total_kwh, numero_de_generator, cost_aproximacio
 
     def __calcEnergySourcesBalance(self, config, balanc_energetic_per_hores):
 
@@ -549,8 +576,7 @@ class OptimalScheduler:
 
                 if len(consumption_profile) < 24:
                     self.kwargs_for_simulating.clear()
-                    return energy_sources_total_profile[
-                           0:len(energy_sources_total_profile) - 1], numero_energy_source, cost, []
+                    return energy_sources_total_profile[0:len(energy_sources_total_profile) - 1], numero_energy_source, cost, []
 
                 for hour in range(0, len(energy_sources_total_profile)):
                     energy_sources_total_profile[hour] += consumption_profile[hour]
@@ -681,6 +707,19 @@ class OptimalScheduler:
                     index += 1
 
                 consumer.vbound_end = index
+
+        generator: AbsGenerator
+        for asset_class in self.solucio_run.generators:  # for every generator class (PV, WT...)
+            for generator in self.solucio_run.generators[asset_class].values():  # for every consumer
+
+                if generator.controllable:
+                    generator.vbound_start = index
+
+                    for hour in range(generator.active_calendar[0], generator.active_calendar[1] + 1):
+                        varbound.append([generator.calendar_range[0], generator.calendar_range[1]])
+                        index += 1
+
+                    generator.vbound_end = index
 
         energy_source: AbsEnergySource
         for asset_class in self.solucio_run.energy_sources:  # for every energy source class (battery...)
