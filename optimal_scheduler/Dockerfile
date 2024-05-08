@@ -14,7 +14,7 @@ RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
 COPY config.yaml config.yaml
 
-RUN apk update && apk add --no-cache build-base
+RUN apk add g++ gfortran pkgconfig cmake openblas openblas-dev
 RUN pip install psutil func_timeout requests numpy pandas
 RUN pip install scikit-learn
 #CAUSE PROBLEMS: scipy pyswarms

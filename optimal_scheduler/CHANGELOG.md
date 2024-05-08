@@ -1,7 +1,7 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
 
 ## 4.5
-- Started the implementation of the foprecasters
+- Started the implementation of the forecasters
 - Started refactoring the generators
 - Test version only
 
