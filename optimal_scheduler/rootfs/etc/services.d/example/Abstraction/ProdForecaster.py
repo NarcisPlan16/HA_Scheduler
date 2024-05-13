@@ -7,10 +7,10 @@ sys.path.append("./usr/lib/python3.11/site-packages/")
 import numpy as np
 import pandas as pd
 from datetime import datetime
-from scikit_learn.ensemble import RandomForestRegressor
-from scikit_learn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
-from scikit_learn.model_selection import cross_val_score, cross_val_predict
-from scikit_learn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
+from sklearn.model_selection import cross_val_score, cross_val_predict
+from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
 
