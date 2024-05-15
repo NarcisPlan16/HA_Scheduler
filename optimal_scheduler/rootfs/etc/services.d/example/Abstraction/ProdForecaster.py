@@ -11,8 +11,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.model_selection import GridSearchCV
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 
 ha_url = "http://192.168.0.110:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
@@ -106,20 +106,20 @@ def CalcCorrMatrix(dataset: pd.DataFrame, display: bool):
 
     corr = dataset.corr()
     if display:
-        sns.set_theme(style="white")
+        #sns.set_theme(style="white")
         mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
 
-        f, ax = plt.subplots(figsize=(14, 12))
-        cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
+        #f, ax = plt.subplots(figsize=(14, 12))
+        #cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
 
         # Draw the heatmap with the mask and correct aspect ratio
-        heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
-                              square=True, linewidths=.5, cbar_kws={"shrink": .5})
+        #heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+        #                      square=True, linewidths=.5, cbar_kws={"shrink": .5})
 
-        plt.show()
+        #plt.show()
 
-        fig = heatmap.get_figure()
-        fig.savefig("correlation_matrix.png")
+        #fig = heatmap.get_figure()
+        #fig.savefig("correlation_matrix.png")
 
     return corr
 
@@ -152,7 +152,7 @@ def display(results):
 
 ini = "2022-01-01"
 end = "2024-04-16"  # Year - month - Day
-request_to_api = False
+request_to_api = True
 
 def Start():
 
@@ -190,7 +190,6 @@ def Start():
 
     #print(data)
     #data[0:72].plot()
-    #plt.show()
 
     # Add the weather forecast. Lat and lon of UdG p4's building
     lat = "41.963138"
@@ -230,10 +229,10 @@ def Start():
     y_test = data_y[train_size:]
 
     total_hours = n_per_batch * data.shape[0]
-    print("Dataset instances: " + str(data.shape[0]))
-    print("Dataset attributes: " + str(data.shape[1]))
-    print("Total hour instances: " + str(total_hours))
-    print(X_train.head())
+    #print("Dataset instances: " + str(data.shape[0]))
+    #print("Dataset attributes: " + str(data.shape[1]))
+    #print("Total hour instances: " + str(total_hours))
+    #print(X_train.head())
 
     parameters = {
         "n_estimators": [int(total_hours*0.1), int(total_hours*0.2), int(total_hours*0.4),
@@ -259,16 +258,5 @@ def Start():
     r2 = r2_score(y_test, y_pred)
     print("R2 score: ", r2)
 
-
-    # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
-    plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_test[0:6].size)]
-    plt.scatter(x, y_test[0:6], color='blue', label='y_test', marker='.')
-    plt.scatter(x, y_pred[0:6], color='orange', label='y_pred', marker='.')
-    plt.xlabel('X_test')
-    plt.ylabel('PV Production')
-    plt.title('Predicted production (Kwh)')
-    plt.legend()
-    plt.show()
 
     return y_pred

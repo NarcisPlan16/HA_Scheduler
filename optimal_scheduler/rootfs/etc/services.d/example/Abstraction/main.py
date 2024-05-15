@@ -8,7 +8,7 @@ import sys
 import requests
 import os
 import subprocess
-import tomllib
+import tomli
 #from pathlib import Path
 
 import OptimalScheduler as optimalscheduler
@@ -115,7 +115,7 @@ def configure(entity: str, files):
         with open(files["Class"], 'r') as file:
             data["attributes"]["Class"] = file.read()
         with open(files["New_attributes"], 'rb') as file:
-            file_data = tomllib.load(file)
+            file_data = tomli.load(file)
             for key, value in file_data.items():
                 data["attributes"][key] = value
 

@@ -16,6 +16,6 @@ Energy_Source_asset_IDs=$(bashio::config 'Energy_Source_asset_IDs')
 Building_consumption_IDs=$(bashio::config 'Building_consumption_IDs')
 
 ## Run your program
-python Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs"
+python3 Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs"
 
 exit

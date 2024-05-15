@@ -60,7 +60,7 @@ class OptimalScheduler:
         # key arguments for those assets that share a common restriction and
         # one execution effects the others assets execution
 
-    def __obtainElectricityPrices():
+    def __obtainElectricityPrices(self):
         
         tomorrow = datetime.today() + timedelta(1)
         tomorrow_str = tomorrow.strftime('%Y%m%d')

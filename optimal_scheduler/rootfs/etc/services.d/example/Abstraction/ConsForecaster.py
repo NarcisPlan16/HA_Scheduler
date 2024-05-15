@@ -5,8 +5,8 @@ import requests
 sys.path.append("./usr/lib/python3.11/site-packages/")
 
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
@@ -107,20 +107,20 @@ def CalcCorrMatrix(dataset: pd.DataFrame, display: bool):
 
     corr = dataset.corr()
     if display:
-        sns.set_theme(style="white")
+        #sns.set_theme(style="white")
         mask = np.triu(np.ones_like(corr, dtype=bool))  # Generate a mask for the upper triangle
 
-        f, ax = plt.subplots(figsize=(14, 12))
-        cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
+        #f, ax = plt.subplots(figsize=(14, 12))
+        #cmap = sns.diverging_palette(230, 20, as_cmap=True)  # Generate a custom diverging colormap
 
         # Draw the heatmap with the mask and correct aspect ratio
-        heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
-                              square=True, linewidths=.5, cbar_kws={"shrink": .5})
+        #heatmap = sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+        #                      square=True, linewidths=.5, cbar_kws={"shrink": .5})
 
-        plt.show()
+        #plt.show()
 
-        fig = heatmap.get_figure()
-        fig.savefig("correlation_matrix.png")
+        #fig = heatmap.get_figure()
+        #fig.savefig("correlation_matrix.png")
 
     return corr
 
@@ -153,7 +153,7 @@ def display(results):
 
 ini = "2024-01-01"
 end = "2024-06-01"  # Year - month - Day
-request_to_api = False
+request_to_api = True
 
 def Start():
     if request_to_api:
@@ -265,24 +265,5 @@ def Start():
     print("MAPE: ", mape)
     r2 = r2_score(y_test, y_pred)
     print("R2 score: ", r2)
-
-
-    # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
-    plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_test.size)]
-    plt.scatter(x, y_test, color='blue', label='Real', marker='.')
-    plt.scatter(x, y_pred, color='orange', label='Predicted', marker='.')
-    plt.xlabel('Hours')
-    plt.ylabel('Consumption')
-    plt.title('Predicted consumption (Kwh)')
-    plt.legend()
-    plt.show()
-
-    plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_train.size)]
-    plt.scatter(x, y_train, color='blue', label='y_train', marker='.')
-    plt.xlabel('Hours')
-    plt.ylabel('Consumption data (Kwh)')
-    plt.show()
 
     return y_pred

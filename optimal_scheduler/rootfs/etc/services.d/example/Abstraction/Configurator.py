@@ -2,7 +2,7 @@
 
 import os
 import sys
-import tomllib
+import tomli
 
 current_dir = os.path.dirname(os.path.abspath("Configurator.py"))
 parent_dir = os.path.dirname(current_dir)
@@ -60,7 +60,7 @@ class Configurator:
         config_path = dir + lecture + ".toml"  # path del fitxer configuració .toml
         print(config_path)
         with open(config_path, "rb") as toml:
-            config_data = tomllib.load(toml)  # Llegim el fitxer
+            config_data = tomli.load(toml)  # Llegim el fitxer
             toml.close()
             print(config_data)
             print("\n")
@@ -80,7 +80,7 @@ class Configurator:
                 try:
                     config_data = self.__readConfigData(path, asset_type, lecture)  # Llegim la configuració del .toml
                     done = True
-                except tomllib.TOMLDecodeError:
+                except tomli.TOMLDecodeError:
                     lecture = input("Error al carregar el fitxer de configuració " + lecture +
                                     "\n Introdueix de nou el seu nom: ")
                 except FileNotFoundError:
