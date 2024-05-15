@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 
-FROM narcisplan/scheduler_addon:v1
+FROM narcisplan/scheduler_addon:v2
 
 ENV PATH="${PATH}:/usr/lib/bashio"
 
