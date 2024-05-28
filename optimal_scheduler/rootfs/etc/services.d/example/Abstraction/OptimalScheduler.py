@@ -69,10 +69,8 @@ class OptimalScheduler:
         self.electricity_sell_prices = [0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054,
                                         0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054]
         
-        self.request_to_api = True
         self.latitude = "41.963138"
         self.longitude = "2.831640"
-
         self.electrcity_production_forecast = ForecastersManager.predictProductionData(ha_url, headers, self.latitude, self.longitude)
         self.electricity_consumption_forecast = ForecastersManager.predictConsumptionData(ha_url, headers, self.latitude, self.longitude)
 
