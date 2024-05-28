@@ -7,6 +7,10 @@ import copy
 import os
 import requests
 import joblib
+import logging
+import sys
+import ForecastersManager
+
 import numpy as np
 import pandas as pd
 
@@ -32,6 +36,16 @@ headers = {
     "Authorization": f"Bearer {bearer_token}",
     "Content-Type": "application/json",
 }
+
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
+
+# Example usage
+#logger.info("AAAAAAAAAAAAAAAAAA")
 
 class OptimalScheduler:
 
@@ -59,14 +73,8 @@ class OptimalScheduler:
         self.latitude = "41.963138"
         self.longitude = "2.831640"
 
-        prod_model = joblib.load("/Forecaster Models/Generation_model.joblib")
-        cons_model = joblib.load("/Forecaster Models/Consumption_model.joblib")
-        today_ini = datetime.today().strftime('%Y%m%d') + '00:00'
-        today_end = datetime.today().strftime('%Y%m%d') + '23:00'
-        today_prod_data = self.__prepareProdData(today_ini, today_end)
-        today_cons_data = self.__prepareConsData(today_ini, today_end)
-        self.electrcity_production_forecast = prod_model.predict(today_prod_data)
-        self.electricity_consumption_forecast = cons_model.predict(today_cons_data)
+        self.electrcity_production_forecast = ForecastersManager.predictProductionData(ha_url, headers, self.latitude, self.longitude)
+        self.electricity_consumption_forecast = ForecastersManager.predictConsumptionData(ha_url, headers, self.latitude, self.longitude)
 
         self.solucio_run = Solution()
         self.solucio_final = Solution()
@@ -77,101 +85,6 @@ class OptimalScheduler:
         self.kwargs_for_simulating = {}
         # key arguments for those assets that share a common restriction and
         # one execution effects the others assets execution
-
-    def __prepareConsData(self, ini, end):
-
-        if self.request_to_api:
-        
-            entity = "sensor.sonnenbatterie_79259_consumption_w"
-            # o bé sumar els grocs i vermells de la visualització principal. CONSUM_PLACA_A_LO_51, ...
-            response = requests.get(
-                f"{ha_url}/api/history/period/" + ini + "T00:00:00?end_time=" + end + "T00:00:00&filter_entity_id=" + entity,
-                headers=headers)
-
-            response_data = response.json()[0]
-            data = pd.DataFrame()
-            data = data.from_dict(response_data)
-            columns = ['last_updated', 'state']
-
-            # Drop columns except the desired ones
-            columns_to_drop = [col for col in data.columns if col not in columns]
-            data = data.drop(columns=columns_to_drop, axis=1)
-            data['state'] = data['state'].apply(pd.to_numeric, errors='coerce')
-            data['last_updated'] = data['last_updated'].str.split('+').str[0]
-            data['last_updated'] = data['last_updated'].apply(datetime.fromisoformat)
-
-            data = data.set_index('last_updated')
-            data = data.resample('1s').mean().ffill().resample('1h').mean()
-            update_indices = data.index
-            data['Timestamp'] = update_indices
-            data = data.reset_index(drop=True, inplace=False)
-            data['Year'] = data['Timestamp'].dt.year
-            data['Month'] = data['Timestamp'].dt.month
-            data['Day'] = data['Timestamp'].dt.day
-            data['Hour'] = data['Timestamp'].dt.hour
-
-            url = f"https://archive-api.open-meteo.com/v1/era5?latitude={self.latitude}&longitude={self.longitude}&start_date={ini}&end_date={end}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
-            response = requests.get(url).json()
-            meteo_data = pd.DataFrame(response['hourly'])
-            meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
-
-            data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-            data['Timestamp'] = data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-            meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
-            meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-            data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
-            data = data.drop(columns='Timestamp', axis=1)
-
-            data.to_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer', index=True)
-
-        else:
-            data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
-
-    def __prepareProdData(self, ini, end):
-        
-        if self.request_to_api:
-            entity = "sensor.sonnenbatterie_79259_meter_production_4_1_w_total"
-            response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T00:00:00&filter_entity_id="+entity, headers=headers)
-
-            response_data = response.json()[0]
-            data = pd.DataFrame()
-            data = data.from_dict(response_data)
-            columns = ['last_updated', 'state']
-
-            # Drop columns except the desired ones
-            columns_to_drop = [col for col in data.columns if col not in columns]
-            data = data.drop(columns=columns_to_drop, axis=1)
-            data['state'] = data['state'].apply(pd.to_numeric, errors='coerce')
-            data['last_updated'] = data['last_updated'].str.split('+').str[0]
-            data['last_updated'] = data['last_updated'].apply(datetime.fromisoformat)
-
-            data = data.set_index('last_updated')
-            data = data.resample('1s').mean().ffill().resample('1h').mean()
-            update_indices = data.index
-            data['Timestamp'] = update_indices
-            data = data.reset_index(drop=True, inplace=False)
-            data['Year'] = data['Timestamp'].dt.year
-            data['Month'] = data['Timestamp'].dt.month
-            data['Day'] = data['Timestamp'].dt.day
-            data['Hour'] = data['Timestamp'].dt.hour
-
-            url = f"https://archive-api.open-meteo.com/v1/era5?latitude={self.latitude}&longitude={self.longitude}&start_date={ini}&end_date={end}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
-            response = requests.get(url).json()
-            meteo_data = pd.DataFrame(response['hourly'])
-            meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
-
-            data['Timestamp'] = pd.to_datetime(data['Timestamp'])
-            data['Timestamp'] = data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-            meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
-            meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-            data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
-            data = data.drop(columns='Timestamp', axis=1)
-
-            data.to_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer', index=True)
-        else:
-            data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
 
 
     def __obtainElectricityPrices(self):

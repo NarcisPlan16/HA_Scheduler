@@ -4,7 +4,7 @@ import requests
 import joblib
 
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, r2_score
 from sklearn.model_selection import cross_val_score, cross_val_predict
@@ -154,7 +154,7 @@ request_to_api = False
 if request_to_api:
 
     entity = "sensor.sonnenbatterie_79259_meter_production_4_1_w_total"
-    response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T00:00:00&filter_entity_id="+entity, headers=headers)
+    response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T23:00:00&filter_entity_id="+entity, headers=headers)
 
     response_data = response.json()[0]
     data = pd.DataFrame()
@@ -191,6 +191,7 @@ else:
 lat = "41.963138"
 lon = "2.831640"
 if request_to_api:
+
     url = f"https://archive-api.open-meteo.com/v1/era5?latitude={lat}&longitude={lon}&start_date={ini}&end_date={end}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
     response = requests.get(url).json()
     meteo_data = pd.DataFrame(response['hourly'])
@@ -242,6 +243,13 @@ parameters = {
 
 #display(cv)
 
+today = datetime.today().strftime('%Y-%m-%d')
+tomorrow = (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d')
+url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&forecast_days=1&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+response = requests.get(url).json()
+meteo_data = pd.DataFrame(response['hourly'])
+meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
+
 model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=None, random_state=0, n_jobs=-1, verbose=False)
 print(model)
 model.fit(X_train, y_train)
@@ -266,3 +274,4 @@ plt.ylabel('PV Production')
 plt.title('Predicted production (Kwh)')
 plt.legend()
 plt.show()
+
