@@ -1,5 +1,6 @@
 import math
 import requests
+import joblib
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -148,17 +149,15 @@ def display(results):
         print(f'{round(mean, 3)} + or -{round(std, 3)} for the {params}')
 
 
-ini = "2024-01-01"
-end = "2024-06-01"  # Year - month - Day
-request_to_api = False
+def Start(request_to_api):
 
-
-def Start():
     if request_to_api:
 
         entity = "sensor.sonnenbatterie_79259_consumption_w"
         # o bé sumar els grocs i vermells de la visualització principal. CONSUM_PLACA_A_LO_51, ...
-        response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T00:00:00&filter_entity_id="+entity, headers=headers)
+        response = requests.get(
+            f"{ha_url}/api/history/period/" + ini + "T00:00:00?end_time=" + end + "T00:00:00&filter_entity_id=" + entity,
+            headers=headers)
 
         response_data = response.json()[0]
         data = pd.DataFrame()
@@ -211,14 +210,14 @@ def Start():
     print("Preprocessing done")
     print("Preparing data")
 
-    #Q1 = np.percentile(data['state'], 25)
-    #Q3 = np.percentile(data['state'], 75)
-    #IQR = Q3 - Q1
+    # Q1 = np.percentile(data['state'], 25)
+    # Q3 = np.percentile(data['state'], 75)
+    # IQR = Q3 - Q1
 
-    #lower_bound = Q1 - 1.5 * IQR
-    #upper_bound = Q3 + 1.5 * IQR
+    # lower_bound = Q1 - 1.5 * IQR
+    # upper_bound = Q3 + 1.5 * IQR
 
-    #data = data[(data['state'] > lower_bound) & (data['state'] < upper_bound)]
+    # data = data[(data['state'] > lower_bound) & (data['state'] < upper_bound)]
 
     data_batches, n_per_batch = PrepareBatches(data, "1D")
     corr_matrix = CalcCorrMatrix(data, False)
@@ -227,7 +226,7 @@ def Start():
 
     print("Data is ready, starting training and model fit")
 
-    train_size = math.floor(len(data)*0.8)
+    train_size = math.floor(len(data) * 0.8)
     data_X, data_y = SeparateXY(data)
     X_train = data_X[0:train_size]
     y_train = data_y[0:train_size]
@@ -240,19 +239,20 @@ def Start():
     print("Total hour instances: " + str(total_hours))
     print(X_train.head())
 
-    parameters = {
-        "n_estimators": [int(total_hours*0.1), int(total_hours*0.2), int(total_hours*0.4),
-                         int(total_hours*0.6), int(total_hours*0.8)],
-        "max_depth": [int(X_train.shape[1]*0.1), int(X_train.shape[1]*0.2), int(X_train.shape[1]*0.4),
-                      int(X_train.shape[1]*0.6), int(X_train.shape[1]*0.8), None]
-    }
-    #model = RandomForestRegressor()
-    #cv = GridSearchCV(model, parameters, cv=5, n_jobs=-1, verbose=True, scoring='r2')
-    #cv.fit(X_train, y_train)
+    #parameters = {
+    #    "n_estimators": [int(total_hours * 0.1), int(total_hours * 0.2), int(total_hours * 0.4),
+    #                     int(total_hours * 0.6), int(total_hours * 0.8)],
+    #    "max_depth": [int(X_train.shape[1] * 0.1), int(X_train.shape[1] * 0.2), int(X_train.shape[1] * 0.4),
+    #                  int(X_train.shape[1] * 0.6), int(X_train.shape[1] * 0.8), None]
+    #}
+    # model = RandomForestRegressor()
+    # cv = GridSearchCV(model, parameters, cv=5, n_jobs=-1, verbose=True, scoring='r2')
+    # cv.fit(X_train, y_train)
 
-    #display(cv)
+    # display(cv)
 
-    model = RandomForestRegressor(n_estimators=int(total_hours*0.1), max_depth=int(X_train.shape[1]*0.5), random_state=0, n_jobs=-1, verbose=False)
+    model = RandomForestRegressor(n_estimators=int(total_hours * 0.1), max_depth=int(X_train.shape[1] * 0.5),
+                                  random_state=0, n_jobs=-1, verbose=False)
     print(model)
     model.fit(X_train, y_train)
 
@@ -263,6 +263,8 @@ def Start():
     print("MAPE: ", mape)
     r2 = r2_score(y_test, y_pred)
     print("R2 score: ", r2)
+
+    joblib.dump(model, "Consumption_model.joblib")
 
     # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
     plt.figure(figsize=(10, 6))
@@ -275,16 +277,22 @@ def Start():
     plt.legend()
     plt.show()
 
-    plt.figure(figsize=(10, 6))
-    x = [i for i in range(0, y_train.size)]
-    plt.scatter(x, y_train, color='blue', label='y_train', marker='.')
-    plt.xlabel('Hours')
-    plt.ylabel('Consumption data (Kwh)')
-    plt.show()
+    #plt.figure(figsize=(10, 6))
+    #x = [i for i in range(0, y_train.size)]
+    #plt.scatter(x, y_train, color='blue', label='y_train', marker='.')
+    #plt.xlabel('Hours')
+    #plt.ylabel('Consumption data (Kwh)')
+    #plt.title('Train data')
+    #plt.show()
 
     return y_pred
 
 
+ini = "2024-01-01"
+end = "2024-06-01"  # Year - month - Day
+request_to_api = False
+
+#---------Test to get the electricity price forecast---------#
 tomorrow = datetime.today() + timedelta(1)
 tomorrow_str = tomorrow.strftime('%Y%m%d')
 url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
@@ -307,3 +315,7 @@ with open('omie_price_pred.csv', 'r') as file:
         hourly_prices.append(hourly_price)
 
 print(hourly_prices)
+#-----------------------------------------------------------#
+
+#today = datetime.today().strftime('%Y%m%d')
+predicted_cons = Start(request_to_api)

@@ -1,6 +1,8 @@
 import math
 import numpy as np
 import requests
+import joblib
+
 import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
@@ -252,6 +254,7 @@ print("MAPE: ", mape)
 r2 = r2_score(y_test, y_pred)
 print("R2 score: ", r2)
 
+joblib.dump(model, "Generation_model.joblib")
 
 # timestamps = pd.to_datetime(X_test['Year', 'Month', 'Day', 'Hour'], format='%Y-%m-%d %H:%M:%S')
 plt.figure(figsize=(10, 6))
