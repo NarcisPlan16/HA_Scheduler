@@ -71,8 +71,9 @@ class OptimalScheduler:
         
         self.latitude = "41.963138"
         self.longitude = "2.831640"
-        self.electrcity_production_forecast = ForecastersManager.predictProductionData(ha_url, headers, self.latitude, self.longitude)
-        self.electricity_consumption_forecast = ForecastersManager.predictConsumptionData(ha_url, headers, self.latitude, self.longitude)
+        self.meteo_data = ForecastersManager.obtainMeteoData(self.latitude, self.longitude)
+        self.electrcity_production_forecast = []
+        self.electricity_consumption_forecast = []
 
         self.solucio_run = Solution()
         self.solucio_final = Solution()
@@ -110,6 +111,31 @@ class OptimalScheduler:
                 hourly_prices.append(hourly_price)
 
         return hourly_prices
+    
+    def __prepareConsumptionPredData(self):
+        
+        dictionary = {'Year': [], 'Month': [], 'Day': [], 'Hour': []}
+        res = pd.DataFrame(dictionary)
+        tomorrow = datetime.today() + timedelta(1)
+        
+        for building_class in self.solucio_run.buildings.values():  # each buildings class
+            for building in building_class.values():  # for every building
+
+                for i in range (0, 24):
+                    res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+
+    def __prepareProductionPredData(self):
+
+        dictionary = {'Year': [], 'Month': [], 'Day': [], 'Hour': []}
+        res = pd.DataFrame(dictionary)
+        tomorrow = datetime.today() + timedelta(1)
+        
+        for generator_class in self.solucio_run.generators:
+            for generator in self.solucio_run.generators[generator_class].values():
+
+                for i in range (0, 24):
+                    res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+
 
     def __optimize(self):
 
@@ -132,6 +158,12 @@ class OptimalScheduler:
         #resultat = self.__runDIRECTModel(self.costSA)
 
         # GA
+        cons_data = self.__prepareConsumptionPredData()
+        self.building_consumption = ForecastersManager.predictConsumption(self.meteo_data, cons_data)
+
+        prod_data = self.__prepareProductionPredData()
+        self.building_production = ForecastersManager.predictProduction(self.meteo_data, prod_data)
+
         model = self.__initializeGAModel(len(self.varbound), self.costDE, self.varbound)
         resultat = self.__runGAModel(model)
 
@@ -625,6 +657,16 @@ class OptimalScheduler:
             self.consumer_invalid_solutions += 1
             return [], (9999999999999 - (valid_ones * 100) + cost_aproximacio), total_hidrogen_kg, valid_ones + 1, {}, {}, []
 
+        # ---------------------------------------------------------- #
+        #
+        #       De moment tots els GENERATORS es comptaràn com 
+        #       si fossin el building production. En un futur
+        #       s'hauria de fer que es fes el forecast per cada 
+        #       un i llavors tenir el seu perfil individual de 
+        #       producció.
+        #
+        # ---------------------------------------------------------- #
+
         # kwh produits pels generators
         generators_total_profile, generators_individual_profile, generators_total_kwh, gen_valids, \
             cost_aproximacio_gen = self.__calcGeneratorsBalance(configuracio)
@@ -635,12 +677,24 @@ class OptimalScheduler:
                 total_hidrogen_kg, (valid_ones + gen_valids + 1), {}, {}, []
 
         # Add the building consuming costs
-        for building_class_list in self.solucio_run.buildings.values():  # get of assets of each buildings class
-            for building in building_class_list.values():  # for every building
+        consumers_total_kwh += sum(self.building_consumption)
+        for hour in range(0, self.hores_simular):
+            consumers_total_profile[hour] += self.building_consumption[hour]
 
-                consumers_total_kwh += building.obtainDailyConsume()
-                for hour in range(0, self.hores_simular):
-                    consumers_total_profile[hour] += building.obtainConsumeByHour(hour)
+        # ---------------------------------------------------------- #
+        #
+        #       De moment tots els GENERATORS es comptaràn com 
+        #       si fossin el building production. En un futur
+        #       s'hauria de fer que es fes el forecast per cada 
+        #       un i llavors tenir el seu perfil individual de 
+        #       producció.
+        #
+        # ---------------------------------------------------------- #
+
+        # Substract the building consuming costs
+        generators_total_kwh += sum(self.building_production)
+        for hour in range(0, self.hores_simular):
+            generators_total_profile[hour] += self.building_production[hour]
 
         balanc_energetic_per_hores = np.subtract(consumers_total_profile, generators_total_profile)
         # negatius és injectar + consumir
