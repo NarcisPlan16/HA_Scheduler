@@ -48,7 +48,7 @@ def checkEnergySources(entity_ids):
                 print(f"[ERROR]: Energy Source {esource} not found in energy sources ist. Check the energy source ID")
                 break
 
-def checkBuilding(entity_ids):
+def checkBuilding(entity_ids): # TODO
     pass
 
 def pairSimulationFiles():
