@@ -8,14 +8,17 @@
 declare Consumer_asset_IDs
 declare Generator_asset_IDs
 declare Consumer_asset_IDs
+declare Building_consumption_IDs
+declare Building_generation_IDs
 
 ## Get the the user config options.
 Consumer_asset_IDs=$(bashio::config 'Consumer_asset_IDs')
 Generator_asset_IDs=$(bashio::config 'Generator_asset_IDs')
 Energy_Source_asset_IDs=$(bashio::config 'Energy_Source_asset_IDs')
 Building_consumption_IDs=$(bashio::config 'Building_consumption_IDs')
+Building_generation_IDs=$(bashio::config 'Building_generation_IDs')
 
 ## Run your program
-python3 Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs"
+python3 Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs" "$Building_generation_IDs"
 
 exit

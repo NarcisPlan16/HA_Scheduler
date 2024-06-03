@@ -25,7 +25,7 @@ def checkConsumers(entity_ids):
         consumers = str(sys.argv[2]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
         for consumer in consumers:
             if consumer not in entity_ids:
-                print(f"[ERROR]: Consumer {consumer} not found in consumer ist. Check the consumer ID")
+                print(f"[ERROR]: Consumer {consumer} not found in consumer list. Check the consumer ID")
                 break
 
 def checkGenerators(entity_ids):
@@ -35,7 +35,7 @@ def checkGenerators(entity_ids):
         generators = str(sys.argv[3]).split("\n") # Convert the inputed consumers string into an array of strings. They must be separated by enlines (\n)
         for generator in generators:
             if generator not in entity_ids:
-                print(f"[ERROR]: Generator {generator} not found in generators ist. Check the generator ID")
+                print(f"[ERROR]: Generator {generator} not found in generators list. Check the generator ID")
                 break
 
 def checkEnergySources(entity_ids):
@@ -45,11 +45,28 @@ def checkEnergySources(entity_ids):
         esources = str(sys.argv[4]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
         for esource in esources:
             if esource not in entity_ids:
-                print(f"[ERROR]: Energy Source {esource} not found in energy sources ist. Check the energy source ID")
+                print(f"[ERROR]: Energy Source {esource} not found in energy sources list. Check the energy source ID")
                 break
 
-def checkBuilding(entity_ids): # TODO
-    pass
+def checkBuildingsConsumption(entity_ids): # TODO
+
+    if str(sys.argv[5]): # the string is not empty
+
+        buildings_cons = str(sys.argv[5]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
+        for building_cons in buildings_cons:
+            if building_cons not in entity_ids:
+                print(f"[ERROR]: Building consumption {building_cons} not found in buildings consumptions list. Check the building consumption ID")
+                break
+
+def checkBuildingsGeneration(entity_ids): # TODO
+
+    if str(sys.argv[6]): # the string is not empty
+
+        buildings_gen = str(sys.argv[6]).split("\n") # Convert the inputed consumers string into an array. They must be separated by enlines (\n)
+        for building_gen in buildings_gen:
+            if building_gen not in entity_ids:
+                print(f"[ERROR]: Building generation {building_gen} not found in buildings generations list. Check the building generation ID")
+                break
 
 def pairSimulationFiles():
 
@@ -131,12 +148,23 @@ def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.O
         asset_config = configure(entity, files) # entity name, entity simula and entity class
         scheduler.addAsset(entity_type, entity, asset_config)
 
+def initBuildings(scheduler: optimalscheduler.OptimalScheduler):
+
+    consumption = str(sys.argv[5]).split("\n") 
+    for entity in consumption:
+        scheduler.AddBuilding("Consumption", entity)
+
+    generation = str(sys.argv[6]).split("\n") 
+    for entity in generation:
+        scheduler.AddBuilding("Generation", entity)
+
 def startSimulation(paired_entities):
 
     scheduler = optimalscheduler.OptimalScheduler()
     initEntities("Consumers", paired_entities["Consumers"], scheduler)
     initEntities("Generators", paired_entities["Generators"], scheduler)
     initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
+    initBuildings(scheduler)
     scheduler.startOptimizationNoPipe()
 
 
@@ -158,7 +186,8 @@ if __name__ == "__main__":
             checkConsumers(entity_ids)
             checkGenerators(entity_ids)
             checkEnergySources(entity_ids)
-            checkBuilding(entity_ids)
+            checkBuildingsConsumption(entity_ids)
+            checkBuildingsGeneration(entity_ids)
 
             paired_entities = pairSimulationFiles()
             startSimulation(paired_entities)

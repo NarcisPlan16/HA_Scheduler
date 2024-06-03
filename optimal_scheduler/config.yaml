@@ -31,6 +31,7 @@ options:
   Generator_asset_IDs: []
   Energy_Source_asset_IDs: []
   Building_consumption_IDs: []
+  Building_generation_IDs: []
   Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
   Classes_code_directory: /config/OptimalScheduler/MyClassesCode
 
@@ -42,6 +43,8 @@ schema:
   Energy_Source_asset_IDs:
     - match(^(.+)$) # TODO: Generate a new regex
   Building_consumption_IDs:
+    - match(^(.+)$) # TODO: Generate a new regex
+  Building_generation_IDs:
     - match(^(.+)$) # TODO: Generate a new regex
   Simulation_code_directory: str
   Classes_code_directory: str

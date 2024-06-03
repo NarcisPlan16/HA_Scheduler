@@ -78,7 +78,7 @@ class OptimalScheduler:
         self.solucio_run = Solution()
         self.solucio_final = Solution()
 
-        self.assets = {'Buildings': {}, 'Consumers': {}, 'EnergySources': {}, 'Generators': {}}
+        self.assets = {'Buildings': {'Consumption': [], 'Generation': []}, 'Consumers': {}, 'EnergySources': {}, 'Generators': {}}
         # TODO: Millorar perquè crei una entrada per cada folder a Asset_types automaticament
 
         self.kwargs_for_simulating = {}
@@ -118,11 +118,13 @@ class OptimalScheduler:
         res = pd.DataFrame(dictionary)
         tomorrow = datetime.today() + timedelta(1)
         
-        for building_class in self.solucio_run.buildings.values():  # each buildings class
-            for building in building_class.values():  # for every building
+        for building_type in self.solucio_run.buildings.values():  # each building type (Consumption or generation)
+            for building in building_type:  # for every item
 
                 for i in range (0, 24):
                     res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+        
+        return res
 
     def __prepareProductionPredData(self):
 
@@ -135,6 +137,8 @@ class OptimalScheduler:
 
                 for i in range (0, 24):
                     res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+
+        return res
 
 
     def __optimize(self):
@@ -945,6 +949,11 @@ class OptimalScheduler:
             self.assets[asset_type][asset_class] = {}
 
         self.assets[asset_type][asset_class][asset.name] = asset
+
+    def AddBuilding(self, type, id):
+
+        if not self.assets["Buildings"][type].__contains__(id):
+            self.assets["Buildings"][type].append(id)
 
     def obtainAssetsInfo(self):
 

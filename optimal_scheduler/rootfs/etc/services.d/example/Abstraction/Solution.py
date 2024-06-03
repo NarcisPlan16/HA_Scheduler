@@ -20,9 +20,9 @@ class Solution:
         self.temps_tardat = 0
 
         self.consumption_data = {}
-        for building_class_list in buildings.values():
-            for edifici in building_class_list.values():
-                self.consumption_data[edifici.name] = edifici.obtainConsumeProfile()
+        for building_type in buildings.values(): # (Generation or consumption)
+            for edifici in building_type:
+                self.consumption_data[edifici] = []
 
         self.production_data = {}
         self.energy_sources_data = {}

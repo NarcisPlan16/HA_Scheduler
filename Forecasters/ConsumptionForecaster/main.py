@@ -49,6 +49,7 @@ def GenerateNewColumns(data_dict: dict):
     for element in row:
         for key_name, value in element.items():
             new_columns.append(key_name + "_" + str(index))
+
         index += 1
 
     return new_columns
@@ -220,6 +221,7 @@ def Start(request_to_api):
     # data = data[(data['state'] > lower_bound) & (data['state'] < upper_bound)]
 
     data_batches, n_per_batch = PrepareBatches(data, "1D")
+    print(data_batches.columns)
     corr_matrix = CalcCorrMatrix(data, False)
     data = CleanByCorrelation(corr_matrix, data_batches)
     print(data.describe())
@@ -288,10 +290,13 @@ def Start(request_to_api):
     return y_pred
 
 
+lat = "41.963138"
+lon = "2.831640"
 ini = "2024-01-01"
 end = "2024-06-01"  # Year - month - Day
 request_to_api = False
 
+"""
 #---------Test to get the electricity price forecast---------#
 tomorrow = datetime.today() + timedelta(1)
 tomorrow_str = tomorrow.strftime('%Y%m%d')
@@ -316,6 +321,8 @@ with open('omie_price_pred.csv', 'r') as file:
 
 print(hourly_prices)
 #-----------------------------------------------------------#
+"""
 
 #today = datetime.today().strftime('%Y%m%d')
 predicted_cons = Start(request_to_api)
+
