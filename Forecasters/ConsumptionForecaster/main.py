@@ -324,5 +324,26 @@ print(hourly_prices)
 """
 
 #today = datetime.today().strftime('%Y%m%d')
-predicted_cons = Start(request_to_api)
+#predicted_cons = Start(request_to_api)
 
+url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&forecast_days=2&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+response = requests.get(url).json()
+meteo_data = pd.DataFrame(response['hourly'])
+meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
+
+meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
+meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
+
+meteo_data['Year'] = meteo_data['Timestamp'].dt.year
+meteo_data['Month'] = meteo_data['Timestamp'].dt.month
+meteo_data['Day'] = meteo_data['Timestamp'].dt.day
+meteo_data['Hour'] = meteo_data['Timestamp'].dt.hour
+
+meteo_data.drop(columns=['Timestamp'], inplace=True)
+
+tomorrow = datetime.today() + timedelta(1)
+meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day]
+meteo_data = meteo_data.reset_index()
+
+meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
