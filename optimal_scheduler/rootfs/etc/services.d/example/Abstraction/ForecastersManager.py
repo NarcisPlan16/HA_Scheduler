@@ -31,7 +31,7 @@ def obtainMeteoData(latitude, longitude):
 
     tomorrow = datetime.today() + timedelta(1)
     meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day]
-    meteo_data = meteo_data.reset_index()
+    meteo_data.reset_index(drop=True, inplace=True)
 
     meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
 
