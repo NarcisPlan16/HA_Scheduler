@@ -220,10 +220,10 @@ def Start(request_to_api):
 
     # data = data[(data['state'] > lower_bound) & (data['state'] < upper_bound)]
 
-    data_batches, n_per_batch = PrepareBatches(data, "1D")
-    print(data_batches.columns)
-    corr_matrix = CalcCorrMatrix(data, False)
-    data = CleanByCorrelation(corr_matrix, data_batches)
+    data, n_per_batch = PrepareBatches(data, "1D")
+    print(data.columns)
+    #corr_matrix = CalcCorrMatrix(data, False)
+    #data = CleanByCorrelation(corr_matrix, data_batches)
     print(data.describe())
 
     print("Data is ready, starting training and model fit")
@@ -324,8 +324,9 @@ print(hourly_prices)
 """
 
 #today = datetime.today().strftime('%Y%m%d')
-#predicted_cons = Start(request_to_api)
+predicted_cons = Start(request_to_api)
 
+"""
 url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&forecast_days=2&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
 response = requests.get(url).json()
 meteo_data = pd.DataFrame(response['hourly'])
@@ -347,3 +348,21 @@ meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day]
 meteo_data.reset_index(drop=True, inplace=True)
 
 meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
+"""
+
+meteo_data = pd.read_json('MeteoForecastData.json', orient='split', compression='infer')
+
+dictionary = {'Year': [], 'Month': [], 'Day': [], 'Hour': []}
+scheduling_data = pd.DataFrame(dictionary)
+tomorrow = datetime.today() #+ timedelta(1)
+for i in range(0, 24):
+    scheduling_data.loc[len(scheduling_data.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+
+data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
+data_batches, n_per_batch = PrepareBatches(data, "1D")
+print(data_batches.head())
+
+cons_model = joblib.load("Consumption_model.joblib")
+prediction = cons_model.predict(data_batches)
+print(prediction)
+

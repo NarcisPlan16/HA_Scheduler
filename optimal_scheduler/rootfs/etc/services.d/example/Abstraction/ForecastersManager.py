@@ -30,7 +30,7 @@ def obtainMeteoData(latitude, longitude):
     meteo_data.drop(columns=['Timestamp'], inplace=True)
 
     tomorrow = datetime.today() + timedelta(1)
-    meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day]
+    meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day] # Delete all forecasts for today and keep only tomorrow
     meteo_data.reset_index(drop=True, inplace=True)
 
     meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
@@ -101,6 +101,10 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
             #for n in range(len(row), len(new_columns)):
             #    row.append(np.NaN)
 
+
+    new_dataset.reset_index(drop=True, inplace=True)
+    print(new_dataset.index.tolist())
+    print(new_dataset.head())
     return new_dataset, n_instances_batch
 
 
@@ -112,7 +116,7 @@ def predictConsumption(meteo_data, scheduling_data):
 
     data = pd.merge(meteo_data, scheduling_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
     data_batches, n_per_batch = PrepareBatches(data, "1D")
-    print(data_batches)
+    #print(data_batches)
 
     consumption = cons_model.predict(data_batches)
 
@@ -125,7 +129,7 @@ def predictProduction(meteo_data, scheduling_data):
 
     print("*****************************************************************************************")
 
-    data = pd.merge(meteo_data, scheduling_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
+    data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
     data_batches, n_per_batch = PrepareBatches(data, "1D")
 
     production = prod_model.predict(data_batches)
