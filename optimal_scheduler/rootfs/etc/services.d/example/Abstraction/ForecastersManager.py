@@ -62,6 +62,7 @@ def GenerateNewColumns(data_dict: dict):
     for element in row:
         for key_name, value in element.items():
             new_columns.append(key_name + "_" + str(index))
+
         index += 1
 
     return new_columns
@@ -101,10 +102,6 @@ def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
             #for n in range(len(row), len(new_columns)):
             #    row.append(np.NaN)
 
-
-    new_dataset.reset_index(drop=True, inplace=True)
-    print(new_dataset.index.tolist())
-    print(new_dataset.head())
     return new_dataset, n_instances_batch
 
 
@@ -112,13 +109,11 @@ def predictConsumption(meteo_data, scheduling_data):
     # Predict the consumption taking into account the scheduling of the assets
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
-    print("*****************************************************************************************")
-
-    data = pd.merge(meteo_data, scheduling_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
+    data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
     data_batches, n_per_batch = PrepareBatches(data, "1D")
-    #print(data_batches)
 
     consumption = cons_model.predict(data_batches)
+    print("----------------------------------PRODUCTION PREDICTION DONE----------------------------------")
 
     return consumption
 
@@ -127,12 +122,17 @@ def predictProduction(meteo_data, scheduling_data):
     # Predict the production taking into account the assets and its schedule
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
-    print("*****************************************************************************************")
-
     data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
+    
+    print("METEO SHAPE: " + str(meteo_data.shape))
+    print("SCHEDULING SHAPE: " + str(scheduling_data.shape))
+
     data_batches, n_per_batch = PrepareBatches(data, "1D")
+    print(data_batches.head())
+    print(n_per_batch)
 
     production = prod_model.predict(data_batches)
+    print("----------------------------------CONSUMPTION PREDICTION DONE----------------------------------")
 
     return production
 

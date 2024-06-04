@@ -26,8 +26,6 @@ def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
 
     res = []
 
-    #print(input_data.__len__())
-
     date = start_date
     index = 0
     while start_date <= date < end_date and index < input_data.__len__():

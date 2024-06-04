@@ -118,11 +118,9 @@ class OptimalScheduler:
         res = pd.DataFrame(dictionary)
         tomorrow = datetime.today() + timedelta(1)
         
-        for building_type in self.solucio_run.buildings.values():  # each building type (Consumption or generation)
-            for building in building_type:  # for every item
-
-                for i in range (0, 24):
-                    res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+        for building_type in self.solucio_run.buildings['Consumption']:  # each building type (Consumption)
+            for i in range (0, 24):
+                res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
         
         return res
 
@@ -132,11 +130,9 @@ class OptimalScheduler:
         res = pd.DataFrame(dictionary)
         tomorrow = datetime.today() + timedelta(1)
         
-        for generator_class in self.solucio_run.generators:
-            for generator in self.solucio_run.generators[generator_class].values():
-
-                for i in range (0, 24):
-                    res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+        for generator_type in self.solucio_run.buildings['Generation']: # each building type (Generation)
+            for i in range (0, 24):
+                res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
 
         return res
 
