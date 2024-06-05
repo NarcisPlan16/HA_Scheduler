@@ -691,7 +691,7 @@ class OptimalScheduler:
         #
         # ---------------------------------------------------------- #
 
-        # Substract the building consuming costs
+        # Add the building production 
         generators_total_kwh += sum(self.building_production)
         for hour in range(0, self.hores_simular):
             generators_total_profile[hour] += self.building_production[hour]

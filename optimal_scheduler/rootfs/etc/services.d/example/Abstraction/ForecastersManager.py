@@ -115,7 +115,7 @@ def predictConsumption(meteo_data, scheduling_data):
     consumption = cons_model.predict(data_batches)
     print("----------------------------------CONSUMPTION PREDICTION DONE----------------------------------")
 
-    return consumption
+    return consumption[0]
 
 
 def predictProduction(meteo_data, scheduling_data):
@@ -128,5 +128,5 @@ def predictProduction(meteo_data, scheduling_data):
     production = prod_model.predict(data_batches)
     print("----------------------------------PRODUCTION PREDICTION DONE----------------------------------")
 
-    return production
+    return production[0]
 
