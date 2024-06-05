@@ -123,13 +123,7 @@ def predictProduction(meteo_data, scheduling_data):
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
     data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
-    
-    print("METEO SHAPE: " + str(meteo_data.shape))
-    print("SCHEDULING SHAPE: " + str(scheduling_data.shape))
-
     data_batches, n_per_batch = PrepareBatches(data, "1D")
-    print(data_batches.head())
-    print(n_per_batch)
 
     production = prod_model.predict(data_batches)
     print("----------------------------------PRODUCTION PREDICTION DONE----------------------------------")

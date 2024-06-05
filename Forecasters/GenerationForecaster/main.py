@@ -1,5 +1,4 @@
 import math
-import torch
 import numpy as np
 import requests
 import joblib
@@ -12,37 +11,6 @@ from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-from darts import TimeSeries, concatenate
-from darts.utils.callbacks import TFMProgressBar
-from darts.utils.timeseries_generation import (
-    gaussian_timeseries,
-    linear_timeseries,
-    sine_timeseries,
-)
-from darts.models import (
-    RNNModel,
-    TCNModel,
-    TransformerModel,
-    NBEATSModel,
-    BlockRNNModel,
-    VARIMA,
-)
-from darts.metrics import mape, smape, mae
-from darts.dataprocessing.transformers import Scaler
-from darts.utils.timeseries_generation import datetime_attribute_timeseries
-from darts.datasets import AirPassengersDataset, MonthlyMilkDataset, ElectricityDataset
-
-
-def generate_torch_kwargs():
-    # run torch models on CPU, and disable progress bars for all model stages except training.
-    return {
-        "pl_trainer_kwargs": {
-            "accelerator": "cpu",
-            "callbacks": [TFMProgressBar(enable_train_bar_only=True)],
-        }
-    }
-
 
 ha_url = "http://192.168.0.110:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
@@ -241,9 +209,6 @@ if request_to_api:
 else:
     data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
 
-cons_data = data[["state", "Year", "Month", "Day", "Hour"]]
-meteo_data = data.drop(columns=["state", "Year", "Month", "Day", "Hour"])
-
 #scaler_cons, scaler_meteo = Scaler(), Scaler()
 #cons_data_scaled = scaler_cons.fit_transform(cons_data)
 #meteo_data_scaled = scaler_meteo.fit_transform(meteo_data)
@@ -251,52 +216,25 @@ meteo_data = data.drop(columns=["state", "Year", "Month", "Day", "Hour"])
 print("Preprocessing done")
 print("Preparing data")
 
-"""
+
 data_batches, n_per_batch = PrepareBatches(data, "1D")
-corr_matrix = CalcCorrMatrix(data, False)
-data = CleanByCorrelation(corr_matrix, data_batches)
-"""
+#corr_matrix = CalcCorrMatrix(data, False)
+#data = CleanByCorrelation(corr_matrix, data_batches)
+
 
 print("Data is ready, starting training and model fit")
 
-scaler_data = Scaler()
+#scaler_data = Scaler()
 #data_scaled = scaler_data.fit_transform(data)
 
-data['DateTime'] = pd.to_datetime(data[['Year', 'Month', 'Day', 'Hour']])
-data.set_index('DateTime', inplace=True)
-data.drop(columns=['Year', 'Month', 'Day', 'Hour'], inplace=True)
+train_size = math.floor(len(data_batches) * 0.8)
+data_X, data_y = SeparateXY(data_batches)
+X_train = data_X[0:train_size]
+y_train = data_y[0:train_size]
+X_test = data_X[train_size:]
+y_test = data_y[train_size:]
 
-train_size = math.floor(len(data)*0.8)
-train_data = data[0:train_size]
-test_data = data[train_size:]
-
-model_air = NBEATSModel(
-    input_chunk_length=24,
-    output_chunk_length=12,
-    n_epochs=200,
-    random_state=0,
-    **generate_torch_kwargs()
-)
-
-model_air.fit(train_data)
-pred = model_air.predict(n=24)
-
-data_scaled.plot(label="actual")
-pred.plot(label="forecast")
-plt.legend()
-print("MAPE = {:.2f}%".format(mape(data_scaled, pred)))
-
-#data_X, data_y = SeparateXY(data)
-#X_train = data_X[0:train_size]
-#y_train = data_y[0:train_size]
-#X_test = data_X[train_size:]
-#y_test = data_y[train_size:]
-
-#total_hours = n_per_batch * data.shape[0]
-#print("Dataset instances: " + str(data.shape[0]))
-#print("Dataset attributes: " + str(data.shape[1]))
-#print("Total hour instances: " + str(total_hours))
-#print(X_train.head())
+print(X_train.head())
 
 """
 parameters = {
@@ -318,8 +256,8 @@ response = requests.get(url).json()
 meteo_data = pd.DataFrame(response['hourly'])
 meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
 """
-"""
-model = RandomForestRegressor(n_estimators=int(total_hours*0.2), max_depth=None, random_state=0, n_jobs=-1, verbose=False)
+
+model = RandomForestRegressor(n_estimators=int(data_batches.shape[0]*0.2), max_depth=None, random_state=0, n_jobs=-1, verbose=False)
 print(model)
 model.fit(X_train, y_train)
 
@@ -343,5 +281,5 @@ plt.ylabel('PV Production')
 plt.title('Predicted production (Kwh)')
 plt.legend()
 plt.show()
-"""
+
 
