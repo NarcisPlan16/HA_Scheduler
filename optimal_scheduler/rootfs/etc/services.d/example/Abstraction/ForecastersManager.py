@@ -3,12 +3,17 @@ import requests
 import joblib
 import os
 
+import forcaster as forecast
 from datetime import datetime, timedelta
 
 current_dir = os.getcwd()
 prod_model = joblib.load(current_dir + "/Abstraction/Forecaster Models/Generation_model.joblib")
-cons_model = joblib.load(current_dir + "/Abstraction/Forecaster Models/Consumption_model.joblib")
+prod_forecaster = forecast.Forcaster(debug=True)
+prod_forecaster.db = prod_model
 
+cons_model = joblib.load(current_dir + "/Abstraction/Forecaster Models/Consumption_model.joblib")
+cons_forecaster = forecast.Forcaster(debug=True)
+cons_forecaster.db = cons_model
 
 def obtainMeteoData(latitude, longitude):
     # forecaste_days is 2 because if we set it to 1, the open-meteo api gives us the forcast for today. Instead we ant the forecast for tomorrow.
@@ -22,111 +27,44 @@ def obtainMeteoData(latitude, longitude):
     meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
     meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
 
-    meteo_data['Year'] = meteo_data['Timestamp'].dt.year
-    meteo_data['Month'] = meteo_data['Timestamp'].dt.month
-    meteo_data['Day'] = meteo_data['Timestamp'].dt.day
-    meteo_data['Hour'] = meteo_data['Timestamp'].dt.hour
-
-    meteo_data.drop(columns=['Timestamp'], inplace=True)
-
-    tomorrow = datetime.today() + timedelta(1)
-    meteo_data = meteo_data[meteo_data['Day'] == tomorrow.day] # Delete all forecasts for today and keep only tomorrow
-    meteo_data.reset_index(drop=True, inplace=True)
-
-    meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
-
+    tomorrow = datetime.today() + timedelta(days=1)
+    start_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0)
+    meteo_data = meteo_data[meteo_data['Timestamp'] >= start_tomorrow]
+    meteo_data.reset_index(inplace=True, drop=True)
+    
     return meteo_data
-
-def GroupInstances(input_data: pd.DataFrame, start_date, end_date):
-
-    res = []
-
-    date = start_date
-    index = 0
-    while start_date <= date < end_date and index < input_data.__len__():
-
-        row = input_data.iloc[index]
-        res.append(row)
-        date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
-        index += 1
-
-    return res, len(res)
-
-
-def GenerateNewColumns(data_dict: dict):
-
-    key, row = next(iter(data_dict.items()))
-    new_columns = []
-
-    index = 0
-    for element in row:
-        for key_name, value in element.items():
-            new_columns.append(key_name + "_" + str(index))
-
-        index += 1
-
-    return new_columns
-
-def PrepareBatches(input_data: pd.DataFrame, timeframe: str):
-
-    grouped_instances = {}
-    index = 0
-    while index < input_data.__len__():
-
-        row = input_data.iloc[index]
-
-        start_date = pd.Timestamp(year=int(row["Year"]), month=int(row["Month"]), day=int(row["Day"]), hour=int(row["Hour"]))
-        end_date = start_date + pd.Timedelta(timeframe) - pd.Timedelta("1h")
-
-        # Find instances within the grouping interval
-        group_instances, count = GroupInstances(input_data[index:], start_date, end_date)
-        index += count
-
-        grouped_instances[start_date] = group_instances
-
-    first_key = next(iter(grouped_instances))
-    n_instances_batch = grouped_instances[first_key].__len__()
-
-    new_columns = GenerateNewColumns(grouped_instances)
-    new_dataset = pd.DataFrame(columns=new_columns)
-    for index, group in grouped_instances.items():
-        row = []
-        for entry in group:
-            for field in entry:
-                row.append(field)
-
-        if len(row) == len(new_columns):
-            row_df = pd.DataFrame({new_columns[i]: [val] for i, val in enumerate(row)}, index=[0])
-            new_dataset = pd.concat([new_dataset, row_df], ignore_index=True)
-
-            #for n in range(len(row), len(new_columns)):
-            #    row.append(np.NaN)
-
-    return new_dataset, n_instances_batch
 
 
 def predictConsumption(meteo_data, scheduling_data):
     # Predict the consumption taking into account the scheduling of the assets
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
-    data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
-    data_batches, n_per_batch = PrepareBatches(data, "1D")
+    data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
+    print(data.head())
+    data = data.set_index('Timestamp')
+    data.drop(columns=['Timestamp'], inplace=True)
+    data.index = pd.to_datetime(data.index)
 
-    consumption = cons_model.predict(data_batches)
+    print(data.head())
+
+    consumption = cons_forecaster.forcast(data)
     print("----------------------------------CONSUMPTION PREDICTION DONE----------------------------------")
 
-    return consumption[0]
+    return consumption
 
 
 def predictProduction(meteo_data, scheduling_data):
     # Predict the production taking into account the assets and its schedule
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
-    data = pd.merge(scheduling_data, meteo_data, on=['Year', 'Month', 'Day', 'Hour'], how='inner')
-    data_batches, n_per_batch = PrepareBatches(data, "1D")
+    data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
+    print(data.head())
+    data = data.set_index('Timestamp')
+    data.drop(columns=['Timestamp'], inplace=True)
+    data.index = pd.to_datetime(data.index)
 
-    production = prod_model.predict(data_batches)
+    production = prod_forecaster.forcast(data)
     print("----------------------------------PRODUCTION PREDICTION DONE----------------------------------")
 
-    return production[0]
+    return production
 

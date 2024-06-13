@@ -114,25 +114,27 @@ class OptimalScheduler:
     
     def __prepareConsumptionPredData(self):
         
-        dictionary = {'Year': [], 'Month': [], 'Day': [], 'Hour': []}
+        dictionary = {'Timestamp': [], 'state': []}
         res = pd.DataFrame(dictionary)
-        tomorrow = datetime.today() + timedelta(1)
-        
+        tomorrow = datetime.today() + timedelta(days=1)
+        start_of_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
+
         for building_type in self.solucio_run.buildings['Consumption']:  # each building type (Consumption)
             for i in range (0, 24):
-                res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+                res.loc[len(res.index)] = [pd.to_datetime(start_of_tomorrow + timedelta(hours=i)), 0]
         
         return res
 
     def __prepareProductionPredData(self):
 
-        dictionary = {'Year': [], 'Month': [], 'Day': [], 'Hour': []}
+        dictionary = {'Timestamp': [], 'state': []}
         res = pd.DataFrame(dictionary)
-        tomorrow = datetime.today() + timedelta(1)
+        tomorrow = datetime.today() + timedelta(days=1)
+        start_of_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
         
         for generator_type in self.solucio_run.buildings['Generation']: # each building type (Generation)
             for i in range (0, 24):
-                res.loc[len(res.index)] = [tomorrow.year, tomorrow.month, tomorrow.day, i]
+                res.loc[len(res.index)] = [pd.to_datetime(start_of_tomorrow + timedelta(hours=i)), 0]
 
         return res
 
