@@ -15,7 +15,7 @@ class Forcaster:
             """
             
             self.debug = debug  # per mostrar per consola prints!
-            self.search_space_conf_file = './search_space.conf'
+            self.search_space_conf_file = '../search_space.conf'
             self.db = dict()  # El model que hem creat.
         
         def windowing_grup(self, datasetin, look_back_ini=24, look_back_fi=48):
