@@ -40,12 +40,8 @@ def predictConsumption(meteo_data, scheduling_data):
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
     data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
-    print(data.head())
     data = data.set_index('Timestamp')
-    data.drop(columns=['Timestamp'], inplace=True)
     data.index = pd.to_datetime(data.index)
-
-    print(data.head())
 
     consumption = cons_forecaster.forcast(data)
     print("----------------------------------CONSUMPTION PREDICTION DONE----------------------------------")
@@ -58,9 +54,7 @@ def predictProduction(meteo_data, scheduling_data):
     # The scheduling data must contain only the columns ['Year', 'Month', 'Day', 'Hour']
 
     data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
-    print(data.head())
     data = data.set_index('Timestamp')
-    data.drop(columns=['Timestamp'], inplace=True)
     data.index = pd.to_datetime(data.index)
 
     production = prod_forecaster.forcast(data)
