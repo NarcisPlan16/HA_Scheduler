@@ -37,15 +37,10 @@ class Forcaster:
             """
             
             dataset = datasetin.copy()
-            print("Windowing: ")
             for i in range(0, len(dataset.columns)):
                 for j in range(look_back_ini, look_back_fi):
                     dataset[dataset.columns[i]+'_'+str(j)] = dataset[dataset.columns[i]].shift(j)
             
-            matching_columns = [col for col in dataset.columns if "precipitation" in col]
-            print(dataset[matching_columns].head()) 
-            print(dataset[matching_columns].tail()) 
-
             return dataset
         
         def windowing_univariant(self, datasetin, look_back_ini=0, look_back_fi=24, variable=''):
@@ -69,7 +64,7 @@ class Forcaster:
             dataset = datasetin.copy()
             for i in range(0, len(dataset.columns)):
                 if dataset.columns[i] == variable:
-                    for j in range(look_back_ini, look_back_fi):
+                    for j in range(look_back_ini, look_back_fi-1):
                         dataset[dataset.columns[i]+'_'+str(j)] = dataset[dataset.columns[i]].shift(j)
 
             return dataset

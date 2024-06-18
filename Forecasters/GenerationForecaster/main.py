@@ -24,7 +24,7 @@ headers = {
 
 ini = "2022-01-01"
 end = "2024-04-16"  # Year - month - Day
-request_to_api = False
+request_to_api = True
 if request_to_api:
 
     entity = "sensor.sonnenbatterie_79259_meter_production_4_1_w_total"
@@ -82,13 +82,13 @@ forecaster = forecast.Forcaster(debug=True)
 forecaster.create_model(
     data=data,
     y='state',
-    look_back={-1: [1, 25]},
+    look_back={-1: [1, 24]},
     colinearity_remove_level=0.9,
     feature_selection='PCA',
-    algorithm=['GBoost', 'RF'],
+    algorithm=['GBoost'],
     params=None,
     escalat='MINMAX',
-    max_time=30
+    max_time=60
 )
 forecaster.save_model("Generation_model.joblib")
 

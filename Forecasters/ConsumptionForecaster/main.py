@@ -84,13 +84,13 @@ def Start(request_to_api):
     forecaster.create_model(
         data=data,
         y='state',
-        look_back={-1: [1, 25]},
+        look_back={-1: [1, 24]},
         colinearity_remove_level=0.9,
         feature_selection='PCA',
         algorithm=['GBoost'],
         params=None,
         escalat='MINMAX',
-        max_time=30
+        max_time=60
     )
     forecaster.save_model("Consumption_model.joblib")
 
@@ -121,7 +121,7 @@ lat = "41.963138"
 lon = "2.831640"
 ini = "2024-01-01"
 end = "2024-06-01"  # Year - month - Day
-request_to_api = False
+request_to_api = True
 
 """
 #---------Test to get the electricity price forecast---------#

@@ -64,7 +64,7 @@ class Forcaster:
             dataset = datasetin.copy()
             for i in range(0, len(dataset.columns)):
                 if dataset.columns[i] == variable:
-                    for j in range(look_back_ini, look_back_fi):
+                    for j in range(look_back_ini, look_back_fi-1):
                         dataset[dataset.columns[i]+'_'+str(j)] = dataset[dataset.columns[i]].shift(j)
 
             return dataset
@@ -75,16 +75,14 @@ class Forcaster:
 
                 # windowing de totes les no especificades individualment
                 if -1 in look_back.keys():  # si indicador es -1 volen un grup
-                    # bolen fer un grup
+                    # volen fer un grup
                     aux = look_back[-1]  # recuperem els valors de la finestra per el grup
-                    if len(aux) == 2:
-                        aux.append(1)  # posem un 1 a salt si nomes tenim ini i final
-
+                
                     # recuperem les que es faran soles
                     keys = list()
                     for i in look_back.keys():
                         if i != -1:
-                            keys.append(i)  # les anem posan a una llista totes les que tenim exepte el-1
+                            keys.append(i)  # les anem posant a una llista totes les que tenim exepte el-1
 
                     dad = data.copy()  # copiem el dataset per no perdre les que niran soles
                     dad = dad.drop(columns=keys)  # eliminem les que van soles
@@ -95,6 +93,7 @@ class Forcaster:
                     # afegim les que aviem tret
                     for i in keys:
                         dad[i] = data[i]
+
                 else:
                     # cas de que no tinguem grups son totes individuals, ho preparem tot per fer les individuals
                     dad = data.copy()  # copiem el dataset
@@ -108,8 +107,6 @@ class Forcaster:
                 variables = [col for col in data.columns if col not in keys]
                 for i in variables:
                     aux = look_back[-1]
-                    if len(aux) == 2:
-                        aux.append(1)
                     dad = self.windowing_univariant(dad, aux[0], aux[1], i)
 
             else:
@@ -433,8 +430,8 @@ class Forcaster:
             """
             
             # Pas 1 - Fem el windowing
-            dad = self.do_windowing(data, look_back)
-            
+            dad = self.do_windowing(data, look_back)        
+
             # Pas 2 - Creem variable dia_setmana, hora, mes?? -- #TODO Fer opcional!!
             dad = self.timestamp_to_attrs(dad, extra_vars)
             
@@ -452,7 +449,7 @@ class Forcaster:
             # perque no tenim instants passats!!!
             ###
             X = dad.dropna()
-            
+
             # Pas 6 - Escalat
             if scaler is not None:
                 x_i = pd.DataFrame(scaler.transform(X))
