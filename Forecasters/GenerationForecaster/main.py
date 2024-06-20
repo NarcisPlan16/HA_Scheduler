@@ -27,7 +27,7 @@ end = "2024-04-16"  # Year - month - Day
 request_to_api = True
 if request_to_api:
 
-    entity = "sensor.sonnenbatterie_79259_meter_production_4_1_w_total"
+    entity = "sensor.symo_3_7_3_s_1_alimentacion_ca"
     response = requests.get(f"{ha_url}/api/history/period/"+ini+"T00:00:00?end_time="+end+"T23:00:00&filter_entity_id="+entity, headers=headers)
 
     response_data = response.json()[0]
@@ -82,7 +82,7 @@ forecaster = forecast.Forcaster(debug=True)
 forecaster.create_model(
     data=data,
     y='state',
-    look_back={-1: [1, 24]},
+    look_back={-1: [2, 25]},
     colinearity_remove_level=0.9,
     feature_selection='PCA',
     algorithm=['GBoost'],

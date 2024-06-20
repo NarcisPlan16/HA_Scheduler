@@ -22,12 +22,17 @@ headers = {
     "Content-Type": "application/json",
 }
 
+lat = "41.963138"
+lon = "2.831640"
+ini = "2024-01-01"
+end = "2024-06-01"  # Year - month - Day
+
 
 def Start(request_to_api):
 
     if request_to_api:
 
-        entity = "sensor.sonnenbatterie_79259_consumption_w"
+        entity = "sensor.smart_meter_63a_energia_real_consumida"
         # o bé sumar els grocs i vermells de la visualització principal. CONSUM_PLACA_A_LO_51, ...
         response = requests.get(
             f"{ha_url}/api/history/period/" + ini + "T00:00:00?end_time=" + end + "T00:00:00&filter_entity_id=" + entity,
@@ -71,6 +76,7 @@ def Start(request_to_api):
         meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
         data = pd.merge(data, meteo_data, on='Timestamp', how='inner')
+        data.set_index(data['Timestamp'], inplace=True)
         data = data.drop(columns='Timestamp', axis=1)
 
         data.to_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer', index=True)
@@ -78,13 +84,13 @@ def Start(request_to_api):
         data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
 
     data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
-    data.index = pd.to_datetime(data.index)
+    #data.index = pd.to_datetime(data.index)
 
     forecaster = forecast.Forcaster(debug=True)
     forecaster.create_model(
         data=data,
         y='state',
-        look_back={-1: [1, 24]},
+        look_back={-1: [2, 25]},
         colinearity_remove_level=0.9,
         feature_selection='PCA',
         algorithm=['GBoost'],
@@ -93,6 +99,12 @@ def Start(request_to_api):
         max_time=60
     )
     forecaster.save_model("Consumption_model.joblib")
+
+    cons_model = joblib.load("Consumption_model.joblib")
+    cons_forecaster = forecast.Forcaster(debug=True)
+    cons_forecaster.db = cons_model
+
+    print(cons_forecaster.forcast(data[0:48]))
 
     """
     plt.figure(figsize=(10, 6))
@@ -116,12 +128,6 @@ def Start(request_to_api):
     return y_pred
     """
 
-
-lat = "41.963138"
-lon = "2.831640"
-ini = "2024-01-01"
-end = "2024-06-01"  # Year - month - Day
-request_to_api = True
 
 """
 #---------Test to get the electricity price forecast---------#

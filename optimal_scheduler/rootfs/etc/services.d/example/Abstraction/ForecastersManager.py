@@ -30,9 +30,21 @@ def obtainMeteoData(latitude, longitude):
     tomorrow = datetime.today() + timedelta(days=1)
     start_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0)
     meteo_data = meteo_data[meteo_data['Timestamp'] >= start_tomorrow]
-    meteo_data.reset_index(inplace=True, drop=True)
-    
-    return meteo_data
+
+    today = (datetime.today() - pd.Timedelta(hours=1)).strftime('%Y-%m-%d')
+    tomorrow = (datetime.today() + pd.Timedelta(hours=0)).strftime('%Y-%m-%d')
+    url = f"https://archive-api.open-meteo.com/v1/era5?latitude={latitude}&longitude={longitude}&start_date={today}&end_date={tomorrow}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+    response = requests.get(url).json()
+    today_meteo_data = pd.DataFrame(response['hourly'])
+    today_meteo_data = today_meteo_data.rename(columns={'time': 'Timestamp'})
+
+    today_meteo_data['Timestamp'] = pd.to_datetime(today_meteo_data['Timestamp'])
+    today_meteo_data['Timestamp'] = today_meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    data = pd.concat([today_meteo_data, meteo_data], ignore_index=True)
+    data.reset_index(inplace=True, drop=True)
+
+    return data
 
 
 def predictConsumption(meteo_data, scheduling_data):

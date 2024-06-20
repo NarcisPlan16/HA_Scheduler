@@ -112,32 +112,39 @@ class OptimalScheduler:
 
         return hourly_prices
     
-    def __prepareConsumptionPredData(self):
+    def __preparePredData(self, type: str):
         
         dictionary = {'Timestamp': [], 'state': []}
         res = pd.DataFrame(dictionary)
+        today = datetime.today() + pd.Timedelta(hours=0)
         tomorrow = datetime.today() + timedelta(days=1)
         start_of_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
 
-        for building_type in self.solucio_run.buildings['Consumption']:  # each building type (Consumption)
+        today_str =  (today + pd.Timedelta(hours=1)).strftime('%Y-%m-%d')
+        tomorrow_str = tomorrow.strftime('%Y-%m-%d')
+
+        for building_type in self.solucio_run.buildings[type]:  # each building type (Consumption or Generation)
+
+            print(building_type)
+
+            # Add previos hours data rows
+            for i in range (0, 24):
+                response = requests.get(
+                    f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
+                    headers=headers)
+
+                response_data = response.json()[0]
+                data = pd.DataFrame()
+                data = data.from_dict(response_data)
+
+                state_data = data['state']
+                res.loc[len(res.index)] = [pd.to_datetime(today + timedelta(hours=i)), state_data[i]]
+
+            # Add prediction rows
             for i in range (0, 24):
                 res.loc[len(res.index)] = [pd.to_datetime(start_of_tomorrow + timedelta(hours=i)), 0]
         
         return res
-
-    def __prepareProductionPredData(self):
-
-        dictionary = {'Timestamp': [], 'state': []}
-        res = pd.DataFrame(dictionary)
-        tomorrow = datetime.today() + timedelta(days=1)
-        start_of_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
-        
-        for generator_type in self.solucio_run.buildings['Generation']: # each building type (Generation)
-            for i in range (0, 24):
-                res.loc[len(res.index)] = [pd.to_datetime(start_of_tomorrow + timedelta(hours=i)), 0]
-
-        return res
-
 
     def __optimize(self):
 
@@ -160,10 +167,10 @@ class OptimalScheduler:
         #resultat = self.__runDIRECTModel(self.costSA)
 
         # GA
-        cons_data = self.__prepareConsumptionPredData()
+        cons_data = self.__preparePredData('Consumption')
         self.building_consumption = ForecastersManager.predictConsumption(self.meteo_data, cons_data)
 
-        prod_data = self.__prepareProductionPredData()
+        prod_data = self.__preparePredData('Generation')
         self.building_production = ForecastersManager.predictProduction(self.meteo_data, prod_data)
 
         model = self.__initializeGAModel(len(self.varbound), self.costDE, self.varbound)
@@ -679,9 +686,12 @@ class OptimalScheduler:
                 total_hidrogen_kg, (valid_ones + gen_valids + 1), {}, {}, []
 
         # Add the building consuming costs
-        consumers_total_kwh += sum(self.building_consumption)
+        consumers_total_kwh += self.building_consumption['state'].sum()
+        hour_index_iter = iter(self.building_consumption.index)
+        hour_index = next(hour_index_iter)
         for hour in range(0, self.hores_simular):
-            consumers_total_profile[hour] += self.building_consumption[hour]
+            consumers_total_profile[hour] += self.building_consumption['state'][hour_index]
+            hour_index = next(hour_index_iter)
 
         # ---------------------------------------------------------- #
         #
