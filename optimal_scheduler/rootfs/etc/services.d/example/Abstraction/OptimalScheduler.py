@@ -148,7 +148,7 @@ class OptimalScheduler:
 
     def __optimize(self):
 
-        print("-------------RUNNING COST OPTIMIZATION ALGORITHM-------------")
+        print("--------------------------RUNNING COST OPTIMIZATION ALGORITHM--------------------------")
 
         """
         Funcio que engega la optimitzacio corresponent. i retorna la millor comanda que s'ha trobat per retornar a l'ESB 
