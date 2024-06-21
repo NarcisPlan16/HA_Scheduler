@@ -48,6 +48,31 @@ logger = logging.getLogger(__name__)
 #logger.info("AAAAAAAAAAAAAAAAAA")
 
 class OptimalScheduler:
+    """
+    Optimal scheduler class. This class is the responsable for the optimization of the assets. Uses teh forecasters to perform the optimization.
+
+    Attributes
+    -----------
+    Here are only the most relevant attributes.
+    maxiter : int
+        Maximum nimber of iterations for the model to perform the optimization.
+    hores_simular : int
+        Number of hours to perform the optimization.
+    electricity_prices: list
+        Hourly buying prices of the electricity (Automaticly calculated using an API).
+    electricity_sell_prices: list
+        Hourly selling prices of the electricity.
+    latitude: float
+        Latitude where we want to get the meto data.
+    longitude: float
+        Longitude where we want to get the meto data.
+    meteo_data: DataFrame
+        Pandas dataframe with the meteorological data prediction for the next day and the data of today. 
+        For example, if predicting the next -hores_simular- hours, this parameter must have size (-hores_simular- * 2, n).
+    kwargs_for_simulating: dict
+        Dictionary with arguments to pass to the simulation code. This parameters helps the simulation code of each asset get the desired information 
+        and enables comunication between assets as you can tore here values and retrieve them with another asset simulation code.
+    """
 
     def __init__(self):
 
@@ -65,7 +90,6 @@ class OptimalScheduler:
         self.generator_invalid_solutions = 0
 
         self.electricity_prices = self.__obtainElectricityPrices()
-
         self.electricity_sell_prices = [0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054,
                                         0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054]
         
@@ -113,6 +137,21 @@ class OptimalScheduler:
         return hourly_prices
     
     def __preparePredData(self, type: str):
+        """
+        Prepares the data for the prediction type specified as parameter -type-
+
+        Parameters
+        -----------
+        type : str
+            String specifying the prediction type.
+            * Consumption
+            * Generation
+        -----------
+        Returns
+        -----------
+        Returns a DataFrame with the data needed for the specified type of prediction. For now, only a Dataframe with Timestamp - State 
+        but on new versions would be good to add all relevant attributes so the forecasters can perform better.
+        """
         
         dictionary = {'Timestamp': [], 'state': []}
         res = pd.DataFrame(dictionary)
