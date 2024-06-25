@@ -29,8 +29,9 @@ from Configurator import Configurator
 from geneticalgorithm.geneticalgorithm import geneticalgorithm
 from datetime import datetime, timedelta
 
-ha_url = "http://192.168.0.110:8123"
-bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
+ha_url = "http://192.168.0.117:8123"
+bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmZThlNTgyNDBhYTA0M2UwOTYyMmRmZWJlMTc5MDc0YyIsImlhdCI6MTcxOTMwNDY4NiwiZXhwIjoyMDM0NjY0Njg2fQ.j8euYQxDWMkJJqHNpTXUBE1rrhpOm1Vr-WcY3fdt8q0"
+# If for some reason, we are getting a code 401 (Unauthorized) and previously we didn0t, try creating a new bearer token
 
 headers = {
     "Authorization": f"Bearer {bearer_token}",
@@ -155,7 +156,8 @@ class OptimalScheduler:
         
         dictionary = {'Timestamp': [], 'state': []}
         res = pd.DataFrame(dictionary)
-        today = datetime.today() + pd.Timedelta(hours=0)
+
+        today = datetime.today().replace(hour=0, minute=0, second=0)
         tomorrow = datetime.today() + timedelta(days=1)
         start_of_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day)
 
@@ -164,24 +166,28 @@ class OptimalScheduler:
 
         for building_type in self.solucio_run.buildings[type]:  # each building type (Consumption or Generation)
 
-            print(building_type)
-
             # Add previos hours data rows
             for i in range (0, 24):
                 response = requests.get(
                     f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
                     headers=headers)
-
+                            
                 response_data = response.json()[0]
                 data = pd.DataFrame()
                 data = data.from_dict(response_data)
 
                 state_data = data['state']
-                res.loc[len(res.index)] = [pd.to_datetime(today + timedelta(hours=i)), state_data[i]]
+                if len(state_data) < 24:  # No available data 
+                    date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                    res.loc[len(res.index)] = [date, 0] # TODO: Find some accurated value to fill the missing values
+                else:
+                    date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                    res.loc[len(res.index)] = [date, state_data[i]]
 
             # Add prediction rows
             for i in range (0, 24):
-                res.loc[len(res.index)] = [pd.to_datetime(start_of_tomorrow + timedelta(hours=i)), 0]
+                date = pd.to_datetime(start_of_tomorrow + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                res.loc[len(res.index)] = [date, 0]
         
         return res
 

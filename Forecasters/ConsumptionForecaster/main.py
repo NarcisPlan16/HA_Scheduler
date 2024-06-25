@@ -14,7 +14,7 @@ from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.model_selection import GridSearchCV
 
 
-ha_url = "http://192.168.0.110:8123"
+ha_url = "http://192.168.0.117:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzZhYjAxYTVkM2M0OGE3YjU0OGQ1NmYxNjQyNWQ2ZCIsImlhdCI6MTcxMzM1MDQxNSwiZXhwIjoyMDI4NzEwNDE1fQ.Eutl8pls09_KCIWESOv17gmIzu-RW32eazbHp2V4Wr0"
 
 headers = {
@@ -180,8 +180,24 @@ meteo_data.reset_index(drop=True, inplace=True)
 meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer', index=True)
 """
 
-Start(True)
+#Start(True)
 
+ini = '2024-06-24'
+end = '2024-06-25'
+entity = "sensor.smart_meter_63a_energia_real_consumida"
+bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmZThlNTgyNDBhYTA0M2UwOTYyMmRmZWJlMTc5MDc0YyIsImlhdCI6MTcxOTMwNDY4NiwiZXhwIjoyMDM0NjY0Njg2fQ.j8euYQxDWMkJJqHNpTXUBE1rrhpOm1Vr-WcY3fdt8q0"
+headers = {
+    "Authorization": f"Bearer {bearer_token}",
+    "Content-Type": "application/json",
+}
 
+response = requests.get(
+    f"http://192.168.0.117:8123/api/history/period/2024-05-05T00:00:00?end_time=2024-05-09T00:00:00&filter_entity_id=sensor.smart_meter_63a_energia_real_consumida",
+    headers=headers)
 
+response_data = response.json()[0]
+data = pd.DataFrame()
+data = data.from_dict(response_data)
+columns = ['last_updated', 'state']
+print(data[columns])
 

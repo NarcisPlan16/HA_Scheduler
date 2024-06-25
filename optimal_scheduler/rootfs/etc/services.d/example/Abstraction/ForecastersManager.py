@@ -79,6 +79,11 @@ def predictConsumption(meteo_data: pd.DataFrame, scheduling_data: pd.DataFrame):
     Returns a DataFrame with the consumption prediction with size (24, n + m).
     """ 
 
+    columns_with_nan = meteo_data.columns[meteo_data.isna().any()].tolist()
+    print(columns_with_nan)
+    print(len(columns_with_nan))
+    print(meteo_data.shape)
+
     data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
     data = data.set_index('Timestamp')
     data.index = pd.to_datetime(data.index)

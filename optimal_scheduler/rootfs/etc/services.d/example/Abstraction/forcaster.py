@@ -444,7 +444,7 @@ class Forcaster:
             del dad[y]
             
             ###
-            # Pas 5 - treiem NaN! -- #TOTO# Fer opcional i permetre emplenar buits??
+            # Pas 5 - treiem NaN! -- #TODO# Fer opcional i permetre emplenar buits??
             # Pero cuidado amb emplenar la classe, ja que aqui ens carreguem obs que no podem predir
             # perque no tenim instants passats!!!
             ###
