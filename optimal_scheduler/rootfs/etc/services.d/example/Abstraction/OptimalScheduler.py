@@ -179,7 +179,7 @@ class OptimalScheduler:
                 state_data = data['state']
                 if len(state_data) < 24:  # No available data 
                     date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                    res.loc[len(res.index)] = [date, 0] # TODO: Find some accurated value to fill the missing values
+                    res.loc[len(res.index)] = [date, 0] # TODO: Use KNN with 5-7 nearest neighbors to fill the NaNs
                 else:
                     date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
                     res.loc[len(res.index)] = [date, state_data[i]]
@@ -732,11 +732,10 @@ class OptimalScheduler:
 
         # Add the building consuming costs
         consumers_total_kwh += self.building_consumption['state'].sum()
-        hour_index_iter = iter(self.building_consumption.index)
-        hour_index = next(hour_index_iter)
-        for hour in range(0, self.hores_simular):
-            consumers_total_profile[hour] += self.building_consumption['state'][hour_index]
-            hour_index = next(hour_index_iter)
+        hour = 0
+        for index in self.building_consumption.index.tolist():
+            consumers_total_profile[hour] += self.building_consumption['state'][index]
+            hour += 1
 
         # ---------------------------------------------------------- #
         #
@@ -749,9 +748,11 @@ class OptimalScheduler:
         # ---------------------------------------------------------- #
 
         # Add the building production 
-        generators_total_kwh += sum(self.building_production)
-        for hour in range(0, self.hores_simular):
-            generators_total_profile[hour] += self.building_production[hour]
+        generators_total_kwh += self.building_production['state'].sum()
+        hour = 0
+        for index in self.building_production.index.tolist():
+            generators_total_profile[hour] += self.building_production['state'][index]
+            hour += 1
 
         balanc_energetic_per_hores = np.subtract(consumers_total_profile, generators_total_profile)
         # negatius és injectar + consumir

@@ -30,8 +30,9 @@ def obtainMeteoData(latitude, longitude):
     Returns a DataFrame with the meteo data of size (48, n).
     """
 
-    # forecaste_days is 2 because if we set it to 1, the open-meteo api gives us the forcast for today. Instead we ant the forecast for tomorrow.
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&forecast_days=2&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+    today = datetime.today().strftime('%Y-%m-%d')
+    tomorrow = (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d')
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&start_date={today}&end_date={tomorrow}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
     response = requests.get(url).json()
     meteo_data = pd.DataFrame(response['hourly'])
     meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
@@ -40,24 +41,7 @@ def obtainMeteoData(latitude, longitude):
     meteo_data['Timestamp'] = meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
     meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
 
-    tomorrow = datetime.today() + timedelta(days=1)
-    start_tomorrow = datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0)
-    meteo_data = meteo_data[meteo_data['Timestamp'] >= start_tomorrow]
-
-    today = (datetime.today() - pd.Timedelta(hours=1)).strftime('%Y-%m-%d')
-    tomorrow = (datetime.today() + pd.Timedelta(hours=0)).strftime('%Y-%m-%d')
-    url = f"https://archive-api.open-meteo.com/v1/era5?latitude={latitude}&longitude={longitude}&start_date={today}&end_date={tomorrow}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
-    response = requests.get(url).json()
-    today_meteo_data = pd.DataFrame(response['hourly'])
-    today_meteo_data = today_meteo_data.rename(columns={'time': 'Timestamp'})
-
-    today_meteo_data['Timestamp'] = pd.to_datetime(today_meteo_data['Timestamp'])
-    today_meteo_data['Timestamp'] = today_meteo_data['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-    data = pd.concat([today_meteo_data, meteo_data], ignore_index=True)
-    data.reset_index(inplace=True, drop=True)
-
-    return data
+    return meteo_data
 
 
 def predictConsumption(meteo_data: pd.DataFrame, scheduling_data: pd.DataFrame):
@@ -79,11 +63,8 @@ def predictConsumption(meteo_data: pd.DataFrame, scheduling_data: pd.DataFrame):
     Returns a DataFrame with the consumption prediction with size (24, n + m).
     """ 
 
-    columns_with_nan = meteo_data.columns[meteo_data.isna().any()].tolist()
-    print(columns_with_nan)
-    print(len(columns_with_nan))
-    print(meteo_data.shape)
-
+    meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
+    scheduling_data['Timestamp'] = pd.to_datetime(scheduling_data['Timestamp'])
     data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
     data = data.set_index('Timestamp')
     data.index = pd.to_datetime(data.index)
@@ -113,6 +94,8 @@ def predictProduction(meteo_data: pd.DataFrame, scheduling_data: pd.DataFrame):
     Returns a DataFrame with the production prediction with size (24, n + m).
     """
 
+    meteo_data['Timestamp'] = pd.to_datetime(meteo_data['Timestamp'])
+    scheduling_data['Timestamp'] = pd.to_datetime(scheduling_data['Timestamp'])
     data = pd.merge(scheduling_data, meteo_data, on=['Timestamp'], how='inner')
     data = data.set_index('Timestamp')
     data.index = pd.to_datetime(data.index)

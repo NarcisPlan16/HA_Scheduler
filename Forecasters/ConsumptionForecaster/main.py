@@ -182,22 +182,11 @@ meteo_data.to_json('MeteoForecastData.json', orient='split', compression='infer'
 
 #Start(True)
 
-ini = '2024-06-24'
-end = '2024-06-25'
-entity = "sensor.smart_meter_63a_energia_real_consumida"
-bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmZThlNTgyNDBhYTA0M2UwOTYyMmRmZWJlMTc5MDc0YyIsImlhdCI6MTcxOTMwNDY4NiwiZXhwIjoyMDM0NjY0Njg2fQ.j8euYQxDWMkJJqHNpTXUBE1rrhpOm1Vr-WcY3fdt8q0"
-headers = {
-    "Authorization": f"Bearer {bearer_token}",
-    "Content-Type": "application/json",
-}
+today = datetime.today().strftime('%Y-%m-%d')
+tomorrow = (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d')
+url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&start_date={today}&end_date={tomorrow}&hourly=temperature_2m,relativehumidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,weathercode,pressure_msl,surface_pressure,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,et0_fao_evapotranspiration,vapor_pressure_deficit,windspeed_10m,windspeed_100m,winddirection_10m,winddirection_100m,windgusts_10m,shortwave_radiation_instant,direct_radiation_instant,diffuse_radiation_instant,direct_normal_irradiance_instant,terrestrial_radiation_instant"
+response = requests.get(url).json()
+meteo_data = pd.DataFrame(response['hourly'])
+meteo_data = meteo_data.rename(columns={'time': 'Timestamp'})
 
-response = requests.get(
-    f"http://192.168.0.117:8123/api/history/period/2024-05-05T00:00:00?end_time=2024-05-09T00:00:00&filter_entity_id=sensor.smart_meter_63a_energia_real_consumida",
-    headers=headers)
-
-response_data = response.json()[0]
-data = pd.DataFrame()
-data = data.from_dict(response_data)
-columns = ['last_updated', 'state']
-print(data[columns])
-
+print(meteo_data.head())
