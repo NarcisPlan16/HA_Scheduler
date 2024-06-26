@@ -166,21 +166,27 @@ class OptimalScheduler:
 
         for building_type in self.solucio_run.buildings[type]:  # each building type (Consumption or Generation)
 
-            # Add previos hours data rows
-            for i in range (0, 24):
-                response = requests.get(
+            response = requests.get(
                     f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
                     headers=headers)
                             
-                response_data = response.json()[0]
-                data = pd.DataFrame()
-                data = data.from_dict(response_data)
+            response_data = response.json()[0]
+            data = pd.DataFrame()
+            data = data.from_dict(response_data)
 
-                state_data = data['state']
-                if len(state_data) < 24:  # No available data 
+            state_data = data['state']
+            if len(data['state']) < 24:  # No available data for past 24h
+                
+                print("[WARNING]: No data found for previous 24h. Searching previous data and using its mean value")
+                #TODO mean = self.__calcMissingValueFiller(today, building_type) 
+                mean = 0
+
+                for i in range (0, 24):
                     date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                    res.loc[len(res.index)] = [date, 0] # TODO: Use KNN with 5-7 nearest neighbors to fill the NaNs
-                else:
+                    res.loc[len(res.index)] = [date, mean]
+
+            else: # Available data for past 24h
+                for i in range (0, 24): # Add previos hours data rows
                     date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
                     res.loc[len(res.index)] = [date, state_data[i]]
 
@@ -190,6 +196,34 @@ class OptimalScheduler:
                 res.loc[len(res.index)] = [date, 0]
         
         return res
+    
+    def __calcMissingValueFiller(self, today, building_type):
+
+        found = False
+        i = 0
+        data = pd.DataFrame()
+        mean = 0
+        while i < 7 and not found:
+
+            ini_str = today.strftime('%Y-%m-%d')
+            end_str = (today - timedelta(days=i)).strftime('%Y-%m-%d')
+
+            response = requests.get(
+                        f"{ha_url}/api/history/period/" + ini_str + "T00:00:00?end_time=" + end_str + "T00:00:00&filter_entity_id=" + building_type,
+                        headers=headers)
+                                
+            response_data = response.json()[0]
+            data = data.from_dict(response_data)
+
+            if not len(data['state']) < 24: 
+                found = False
+
+        if not found:
+            print(f"[ERROR]: No recent data found for asset {building_type} on the previous 7 days")
+        else:
+            mean = data['state'].mean()
+            
+        return mean
 
     def __optimize(self):
 
