@@ -985,6 +985,9 @@ class OptimalScheduler:
         #    prof.disable()
         #    prof.print_stats(sort='cumtime')
 
+        self.__postResultsToHA(result)
+
+        print("Result: ")
         print(result)
         self.solucio_final.model_variables = result #result.x for the DE algorithm
         self.solucio_final.temps_tardat = temps_fi - temps_inici
@@ -993,6 +996,11 @@ class OptimalScheduler:
         print(x_values)
 
         self.mostrarResultat(temps_fi - temps_inici)
+
+    def __postResultsToHA(self, results):
+        # TODO: Add API POST to schedule the results for each asset optimization
+
+        pass
 
     def __unpackSimulationResults(self, res_dictionary: dict):
 
