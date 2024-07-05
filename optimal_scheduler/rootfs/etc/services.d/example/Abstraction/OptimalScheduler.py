@@ -103,7 +103,16 @@ class OptimalScheduler:
         self.solucio_run = Solution()
         self.solucio_final = Solution()
 
-        self.assets = {'Buildings': {'Consumption': [], 'Generation': []}, 'Consumers': {}, 'EnergySources': {}, 'Generators': {}}
+        self.n_assets = 0
+        self.assets = {
+            'Buildings': {
+                'Consumption': [], 
+                'Generation': []
+            }, 
+            'Consumers': {}, 
+            'EnergySources': {}, 
+            'Generators': {}
+        }
         # TODO: Millorar perquè crei una entrada per cada folder a Asset_types automaticament
 
         self.kwargs_for_simulating = {}
@@ -166,34 +175,38 @@ class OptimalScheduler:
 
         for building_type in self.solucio_run.buildings[type]:  # each building type (Consumption or Generation)
 
-            response = requests.get(
-                    f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
-                    headers=headers)
-                            
-            response_data = response.json()[0]
-            data = pd.DataFrame()
-            data = data.from_dict(response_data)
+            try:
+                response = requests.get(
+                        f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
+                        headers=headers)
+                                
+                response_data = response.json()[0]
+                data = pd.DataFrame()
+                data = data.from_dict(response_data)
 
-            state_data = data['state']
-            if len(data['state']) < 24:  # No available data for past 24h
-                
-                print("[WARNING]: No data found for previous 24h. Searching previous data and using its mean value")
-                #TODO mean = self.__calcMissingValueFiller(today, building_type) 
-                mean = 0
+                state_data = data['state']
+                if len(data['state']) < 24:  # No available data for past 24h
+                    
+                    print("[WARNING]: No data found for previous 24h. Searching previous data and using its mean value")
+                    #TODO mean = self.__calcMissingValueFiller(today, building_type) 
+                    mean = 0
 
+                    for i in range (0, 24):
+                        date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                        res.loc[len(res.index)] = [date, mean]
+
+                else: # Available data for past 24h
+                    for i in range (0, 24): # Add previos hours data rows
+                        date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                        res.loc[len(res.index)] = [date, state_data[i]]
+
+                # Add prediction rows
                 for i in range (0, 24):
-                    date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                    res.loc[len(res.index)] = [date, mean]
+                    date = pd.to_datetime(start_of_tomorrow + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
+                    res.loc[len(res.index)] = [date, 0]
 
-            else: # Available data for past 24h
-                for i in range (0, 24): # Add previos hours data rows
-                    date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                    res.loc[len(res.index)] = [date, state_data[i]]
-
-            # Add prediction rows
-            for i in range (0, 24):
-                date = pd.to_datetime(start_of_tomorrow + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                res.loc[len(res.index)] = [date, 0]
+            except KeyError:
+                print(f"[ERROR]: Couldn't get {building_type} state")
         
         return res
     
@@ -1044,12 +1057,15 @@ class OptimalScheduler:
         if not self.assets[asset_type].__contains__(asset_class):
             self.assets[asset_type][asset_class] = {}
 
-        self.assets[asset_type][asset_class][asset.name] = asset
+        if not self.assets[asset_type][asset_class].__contains__(asset.name):
+            self.assets[asset_type][asset_class][asset.name] = asset
+            self.n_assets += 1
 
     def AddBuilding(self, type, id):
 
         if not self.assets["Buildings"][type].__contains__(id):
             self.assets["Buildings"][type].append(id)
+            self.n_assets += 1
 
     def obtainAssetsInfo(self):
 

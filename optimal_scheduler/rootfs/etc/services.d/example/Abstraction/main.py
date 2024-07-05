@@ -150,13 +150,15 @@ def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.O
 
 def initBuildings(scheduler: optimalscheduler.OptimalScheduler):
 
-    consumption = str(sys.argv[5]).split("\n") 
-    for entity in consumption:
-        scheduler.AddBuilding("Consumption", entity)
+    consumption = str(sys.argv[5]).split("\n")
+    if consumption != ['']:
+        for entity in consumption:
+            scheduler.AddBuilding("Consumption", entity)
 
     generation = str(sys.argv[6]).split("\n") 
-    for entity in generation:
-        scheduler.AddBuilding("Generation", entity)
+    if generation != ['']:
+        for entity in generation:
+            scheduler.AddBuilding("Generation", entity)
 
 def startSimulation(paired_entities):
 
@@ -165,8 +167,15 @@ def startSimulation(paired_entities):
     initEntities("Generators", paired_entities["Generators"], scheduler)
     initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
     initBuildings(scheduler)
-    scheduler.startOptimizationNoPipe()
 
+    if scheduler.n_assets > 0:
+        scheduler.startOptimizationNoPipe()
+    else:
+        print("+-----------------------------------------------------------------------------------------+")
+        print("|                                                                                         |")
+        print("|                No assets to be optimized. Maybe you forgot to add some?                 |")
+        print("|                                                                                         |")
+        print("+-----------------------------------------------------------------------------------------+")
 
 if __name__ == "__main__":
 
@@ -191,6 +200,8 @@ if __name__ == "__main__":
 
             paired_entities = pairSimulationFiles()
             startSimulation(paired_entities)
+
+            time.sleep(20)
 
         except json.JSONDecodeError as e:
             # If response is not JSON, print the response content
