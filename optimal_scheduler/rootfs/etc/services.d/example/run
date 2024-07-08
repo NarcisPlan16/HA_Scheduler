@@ -21,4 +21,4 @@ Building_generation_IDs=$(bashio::config 'Building_generation_IDs')
 ## Run your program
 python3 Abstraction/main.py "$SUPERVISOR_TOKEN" "$Consumer_asset_IDs" "$Generator_asset_IDs" "$Energy_Source_asset_IDs" "$Building_consumption_IDs" "$Building_generation_IDs"
 
-exit
+exec /run/s6/basedir/bin/halt

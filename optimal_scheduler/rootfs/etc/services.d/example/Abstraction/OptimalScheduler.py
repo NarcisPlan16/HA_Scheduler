@@ -843,7 +843,7 @@ class OptimalScheduler:
 
                 print("\n")
 
-        print("--------------Resultats de la predicció--------------")
+        print("--------------Resultats de la optimització--------------")
         for consumer in self.solucio_final.consumption_data:
             print(consumer)
             print(self.solucio_final.consumption_data[consumer])
@@ -960,23 +960,6 @@ class OptimalScheduler:
         x_values = range(1, len(self.progress)+1)
         print(x_values)
 
-        #plt.plot(x_values, self.progress)
-        #plt.grid()
-        #plt.xlabel("Iteration")
-        #plt.ylabel("Cost (€)")
-        #plt.title("Cost over iterations")
-
-        #fig1 = plt.gcf()
-
-        #current_dir = os.getcwd()
-        #if self.console_debug:
-        #    current_dir = os.path.join(current_dir, "Abstraction")
-        #img_dir = os.path.join(current_dir, "result_imgs", "cost.png")
-        #os.makedirs("result_imgs", exist_ok=True)
-        #fig1.savefig(img_dir, dpi=200)
-
-        #plt.show()
-
         self.mostrarResultat(temps_fi - temps_inici)
 
     def startOptimizationNoPipe(self):
@@ -998,7 +981,8 @@ class OptimalScheduler:
         #    prof.disable()
         #    prof.print_stats(sort='cumtime')
 
-        self.__postResultsToHA(result)
+        #self.__postResultsToHA(result)
+        self.__postAsset("a", [])
 
         print("Result: ")
         print(result)
@@ -1011,9 +995,42 @@ class OptimalScheduler:
         self.mostrarResultat(temps_fi - temps_inici)
 
     def __postResultsToHA(self, results):
-        # TODO: Add API POST to schedule the results for each asset optimization
+        # API POST to schedule the results for each asset scheduled optimization
 
-        pass
+        start = 0
+        end = 0
+
+        for consumer_class in self.solucio_final.consumers:
+            for consumer in self.solucio_final.consumers[consumer_class].values():
+
+                end += consumer.active_calendar[1] + 1
+                self.__postAsset(consumer.name, self.solucio_final.model_variables[start:end])
+
+                start = end + 1
+
+
+        for source_class in self.solucio_final.energy_sources:
+            for source in self.solucio_final.energy_sources[source_class].values():
+
+                end += source.active_calendar[1] + 1
+                self.__postAsset(source.name, self.solucio_final.model_variables[start:end])
+
+                start = end + 1
+
+    def __postAsset(asset_id : str, asset_schdule):
+
+        script_entity_id = "script.test_script"
+        data = {
+            "entity_id": script_entity_id
+        }
+
+        response = requests.post(ha_url, headers=headers, json=data)
+        if response.status_code != 200:
+            print(f"Failed to execute script: {response.status_code}")
+            print(response.text) 
+
+        else:
+            pass              
 
     def __unpackSimulationResults(self, res_dictionary: dict):
 
