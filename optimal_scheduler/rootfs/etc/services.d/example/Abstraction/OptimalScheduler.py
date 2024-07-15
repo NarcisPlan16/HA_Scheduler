@@ -855,7 +855,7 @@ class OptimalScheduler:
                 print(self.solucio_final.energy_sources_data[source])
                 print("\n")
 
-        print("---Preu per hores sense comptar l'hidrogen---")
+        print("---Preu per hores (només costos elèctrics)---")
         print(self.solucio_final.cost_per_hours)
         print("Sumat: ", sum(self.solucio_final.cost_per_hours))
         print("\n")
@@ -981,8 +981,7 @@ class OptimalScheduler:
         #    prof.disable()
         #    prof.print_stats(sort='cumtime')
 
-        #self.__postResultsToHA(result)
-        self.__postAsset("a", [])
+        self.__postResultsToHA(result)
 
         print("Result: ")
         print(result)
@@ -1017,14 +1016,18 @@ class OptimalScheduler:
 
                 start = end + 1
 
-    def __postAsset(asset_id : str, asset_schdule):
+    def __postAsset(self, asset_id : str, asset_schdule):
 
-        script_entity_id = "script.test_script"
+        script_entity_id = "script.Scheduler_script"
         data = {
-            "entity_id": script_entity_id
+            "entity_id": script_entity_id,
+            "variables": {
+                "entity_id": asset_id,
+                "entity_schedule": asset_schdule
+            }
         }
 
-        response = requests.post(ha_url, headers=headers, json=data)
+        response = requests.post(ha_url+"/api/services/script/turn_on", headers=headers, json=data)
         if response.status_code != 200:
             print(f"Failed to execute script: {response.status_code}")
             print(response.text) 
