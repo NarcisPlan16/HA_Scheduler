@@ -39,7 +39,7 @@ def Start(request_to_api):
 
     if request_to_api:
         # Define the entity to be queried from Home Assistant
-        entity = "sensor.smart_meter_63a_energia_real_consumida"
+        entity = "sensor.smart_meter_63a_energia_real_consumida" # o bé sumar els grocs i vermells de la visualització principal. CONSUM_PLACA_A_LO_51, ...
         
         # Send a GET request to Home Assistant's history API to fetch data
         response = requests.get(
@@ -106,6 +106,9 @@ def Start(request_to_api):
     else:
         # Load data with weather forecast if not fetching from API
         data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
+
+    #data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
+    #data.index = pd.to_datetime(data.index)
 
     # Create and save the forecasting model
     forecaster = forecast.Forcaster(debug=True)
