@@ -62,7 +62,7 @@ else:
     # If not requesting from the API, load data from the saved JSON file
     data = pd.read_json('PVProduction.json', orient='split', compression='infer')
 
-# Latitude and longitude for weather data fetching
+# Latitude and longitude for weather data fetching. Lat and lon of UdG p4's building
 lat = "41.963138"
 lon = "2.831640"
 
