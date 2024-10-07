@@ -27,11 +27,11 @@ map:
   - addon_config:rw
   - addons:r
 options:
-  Consumer_asset_IDs: []
-  Generator_asset_IDs: []
-  Energy_Source_asset_IDs: []
-  Building_consumption_IDs: []
-  Building_generation_IDs: []
+  Controllable_Consumer_asset_IDs: []
+  Controllable_Generator_asset_IDs: []
+  Controllable_Energy_Source_asset_IDs: []
+  Base_Building_consumption_IDs: []
+  Base_Building_generation_IDs: []
   Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
   Classes_code_directory: /config/OptimalScheduler/MyClassesCode
 
