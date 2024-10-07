@@ -216,6 +216,7 @@ class Forcaster:
                 model - El millor model trobat després de la cerca aleatòria o amb els paràmetres especificats.
                 score - El millor valor del Mean Absolute Error (MAE) obtingut durant la cerca.
             """
+            
             ## Primer carreguem el grid de paràmetres des del fitxer i fem els imports necessaris
             import json
             with open(self.search_space_conf_file) as json_file:
