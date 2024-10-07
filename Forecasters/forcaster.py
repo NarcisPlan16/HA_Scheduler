@@ -1,14 +1,45 @@
+# Importem les llibreries necessàries
 # -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
-
 import joblib
 import holidays
 import warnings
 warnings.filterwarnings('ignore')
 
-
 class Forcaster:
+        """
+        Classe Forcaster per a la creació i gestió de models de predicció basats en dades temporals.
+
+        Aquesta classe proporciona una sèrie de mètodes per:
+        - Inicialitzar i configurar models de predicció.
+        - Aplicar tècniques de "windowing" per crear variables addicionals basades en dades temporals.
+        - Realitzar la selecció d'atributs per millorar el rendiment del model.
+        - Entrenar models utilitzant diversos algorismes de machine learning.
+        - Escalar dades per a la normalització o robustesa.
+        - Realitzar prediccions sobre noves dades.
+        - Desar i carregar models per a un ús posterior.
+
+        Atributs:
+            debug (bool): Indica si el mode de depuració està activat. Si és True, s'imprimiran missatges de depuració per ajudar en el desenvolupament.
+            db (dict): Diccionari per emmagatzemar models creats, escaladors i configuracions necessàries.
+
+        Mètodes:
+            - __init__(debug): Inicialitza la classe amb opcions de depuració.
+            - windowing_grup(datasetin, look_back_ini, look_back_fi): Crea variables de "windowing" per a un conjunt de dades.
+            - windowing_univariant(datasetin, look_back_ini, look_back_fi, variable): Crea variables de "windowing" per a una variable especificada.
+            - do_windowing(data, look_back): Aplica tècniques de "windowing" sobre el conjunt de dades.
+            - colinearity_remove(datasetin, y, level): Elimina variables correlacionades segons un llindar especificat.
+            - Model(X, y, algorithm, params, max_time): Realitza una cerca aleatòria per trobar la millor configuració per a un model.
+            - treu_atrs(X, y, metode): Realitza la selecció d'atributs sobre el conjunt de dades.
+            - create_model(data, y, look_back, extra_vars, colinearity_remove_level, feature_selection, algorithm, params, escalat, max_time): Crea i configura un model de predicció.
+            - forcast(data): Realitza la predicció sobre les dades proporcionades.
+            - timestamp_to_attrs(dad, extra_vars): Crea variables addicionals basades en el timestamp.
+            - scalate_data(data, escalat): Escala les dades utilitzant diferents mètodes.
+            - save_model(filename): Desa el model actual en un fitxer.
+            - load_model(filename): Carrega un model des d'un fitxer.
+        """
+
         def __init__(self, debug = False):
             """
             Constructor per defecte
