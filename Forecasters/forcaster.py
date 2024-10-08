@@ -51,7 +51,7 @@ class Forcaster:
         
         def windowing_grup(self, datasetin, look_back_ini=24, look_back_fi=48):
             """
-            Funcio per crear les variables del windowing. Treballa sobre un dataset i inclou la variable objectiu!
+            Funció per crear les variables del windowing. Treballa sobre un dataset i inclou la variable objectiu!
             les variables creades es diran com l'original (legacy) i s'afegirà '_' i el numero de desplacament al final del nom.
             Es tindran en compte les hores en el rang [ini, fi)
             
@@ -76,7 +76,7 @@ class Forcaster:
         
         def windowing_univariant(self, datasetin, look_back_ini=0, look_back_fi=24, variable=''):
             """
-            Funcio per crear les variables del windowing. de la variable indicada Treballa sobre un dataset i inclou la variable objectiu!
+            Funció per crear les variables del windowing. de la variable indicada Treballa sobre un dataset i inclou la variable objectiu!
             les variables creades es diran com l'original (legacy) i s'afegira '_' i el numero de desplacament al final del nom.
             Es tindran en compte les hores en el rang [ini, fi).
             
@@ -387,7 +387,7 @@ class Forcaster:
             return [model_select, X_new, y]
 
 
-        #A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forcasting 
+        # A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forcasting 
         # create_model() - crear i guardar el model
         # forcasting() - recuperar i utilitzar el model 
         def create_model(self, data, y, look_back={-1:[25,48]}, extra_vars={'variables':['Dia','Hora','Mes'], 'festius':['ES','CT']},
