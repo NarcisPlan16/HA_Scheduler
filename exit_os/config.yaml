@@ -1,9 +1,9 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
-name: Optimal Scheduler
+name: Exit OS
 version: "4.5"
-slug: optimal_scheduler
+slug: exit_os
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
-url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
+url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/exit_os"
 arch:
   - armhf
   - armv7
@@ -32,8 +32,8 @@ options:
   Controllable_Energy_Source_asset_IDs: []
   Base_Building_consumption_IDs: []
   Base_Building_generation_IDs: []
-  Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
-  Classes_code_directory: /config/OptimalScheduler/MyClassesCode
+  Simulation_code_directory: /config/ExitOS/MySimulationCode
+  Classes_code_directory: /config/ExitOS/MyClassesCode
 
 schema:
   Controllable_Consumer_asset_IDs: 

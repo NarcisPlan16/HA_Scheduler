@@ -1,4 +1,4 @@
-# Optimal Scheduler Add-on
+# Exit OS Add-on
 
 _Otimal Scheduler add-on for optimization of energy consumption and production_
 

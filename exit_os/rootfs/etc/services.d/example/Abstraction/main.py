@@ -11,7 +11,7 @@ import subprocess
 import tomli
 #from pathlib import Path
 
-import OptimalScheduler as optimalscheduler
+import ExitOS as exit_os
 
 # URL for the Home Assistant API
 # TODO: WORK WITH .secrets
@@ -73,8 +73,8 @@ def pairSimulationFiles():
     result = {"Consumers": {}, "Generators": {}, "Energy Sources": {}}
     
     # Convert the inputed consumers, generators and energy sources strings into an array. They must be separated by enlines (\n)
-    list_simu_dir = os.listdir("/share/config_optimal_scheduler/MySimulationCode") # Get the list of files on the config directory
-    list_class_dir = os.listdir("/share/config_optimal_scheduler/MyClassesCode") # Get the list of files on the classes directory
+    list_simu_dir = os.listdir("/share/config_exit_os/MySimulationCode") # Get the list of files on the config directory
+    list_class_dir = os.listdir("/share/config_exit_os/MyClassesCode") # Get the list of files on the classes directory
 
     if str(sys.argv[2]): # String not empty
 
@@ -82,9 +82,9 @@ def pairSimulationFiles():
         for entity in entities:
             if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py") and list_simu_dir.__contains__("SIMU_"+entity+".toml"):
                 result["Consumers"][entity] = {}
-                result["Consumers"][entity]["Simulate"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".py"
-                result["Consumers"][entity]["Class"] = "/share/config_optimal_scheduler/MyClassesCode/"+entity+".py"
-                result["Consumers"][entity]["New_attributes"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".toml"
+                result["Consumers"][entity]["Simulate"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".py"
+                result["Consumers"][entity]["Class"] = "/share/config_exit_os/MyClassesCode/"+entity+".py"
+                result["Consumers"][entity]["New_attributes"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".toml"
             else:
                 print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
@@ -94,9 +94,9 @@ def pairSimulationFiles():
         for entity in entities:
             if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
                 result["Generators"][entity] = {}
-                result["Generators"][entity]["Simulate"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".py"
-                result["Generators"][entity]["Class"] = "/share/config_optimal_scheduler/MyClassesCode/"+entity+".py"
-                result["Generators"][entity]["New_attributes"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".toml"
+                result["Generators"][entity]["Simulate"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".py"
+                result["Generators"][entity]["Class"] = "/share/config_exit_os/MyClassesCode/"+entity+".py"
+                result["Generators"][entity]["New_attributes"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".toml"
             else:
                 print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
@@ -106,9 +106,9 @@ def pairSimulationFiles():
         for entity in entities:
             if list_simu_dir.__contains__("SIMU_"+entity+".py") and list_class_dir.__contains__(entity+".py"):
                 result["Energy Sources"][entity] = {}            
-                result["Energy Sources"][entity]["Simulate"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".py"
-                result["Energy Sources"][entity]["Class"] = "/share/config_optimal_scheduler/MyClassesCode/"+entity+".py"
-                result["Energy Sources"][entity]["New_attributes"] = "/share/config_optimal_scheduler/MySimulationCode/SIMU_"+entity+".toml"
+                result["Energy Sources"][entity]["Simulate"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".py"
+                result["Energy Sources"][entity]["Class"] = "/share/config_exit_os/MyClassesCode/"+entity+".py"
+                result["Energy Sources"][entity]["New_attributes"] = "/share/config_exit_os/MySimulationCode/SIMU_"+entity+".toml"
             else:
                 print(f"[ERROR]: Simulation or class code not found for entity {entity}")
 
@@ -142,13 +142,13 @@ def configure(entity: str, files):
 
 
 
-def initEntities(entity_type, entities_list: dict, scheduler: optimalscheduler.OptimalScheduler):
+def initEntities(entity_type, entities_list: dict, scheduler: ExitOS.ExitOS):
 
     for entity, files in entities_list.items():
         asset_config = configure(entity, files) # entity name, entity simula and entity class
         scheduler.addAsset(entity_type, entity, asset_config)
 
-def initBuildings(scheduler: optimalscheduler.OptimalScheduler):
+def initBuildings(scheduler: ExitOS.ExitOS):
 
     consumption = str(sys.argv[5]).split("\n")
     if consumption != ['']:
@@ -162,7 +162,7 @@ def initBuildings(scheduler: optimalscheduler.OptimalScheduler):
 
 def startSimulation(paired_entities):
 
-    scheduler = optimalscheduler.OptimalScheduler()
+    scheduler = ExitOS.ExitOS()
     initEntities("Consumers", paired_entities["Consumers"], scheduler)
     initEntities("Generators", paired_entities["Generators"], scheduler)
     initEntities("EnergySources", paired_entities["Energy Sources"], scheduler)
