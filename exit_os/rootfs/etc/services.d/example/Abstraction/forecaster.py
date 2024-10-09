@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class Forcaster:
+class forecaster:
         def __init__(self, debug = False):
             """
             Constructor per defecte
@@ -207,7 +207,7 @@ class Forcaster:
                     
                     # recuperem la llibreria correcte
                     a = __import__(impo1, globals(), locals(), [impo2])
-                    Forcast_algorithm = eval("a."+impo2)
+                    forecast_algorithm = eval("a."+impo2)
                     
                     try:
                         #creem i evaluem els models 1 a 1
@@ -217,7 +217,7 @@ class Forcaster:
                             j=0
                             
                         for params in sampler:
-                            regr = Forcast_algorithm(**params)
+                            regr = forecast_algorithm(**params)
                             pred_test = regr.fit(X_train, y_train).predict(X_test)
                             act = mean_absolute_error(y_test, pred_test)
                             if best_mae > act:
@@ -252,14 +252,14 @@ class Forcaster:
                     impo1 = d[algorithm][2]
                     impo2 = d[algorithm][3]
                 except:
-                    raise ValueError('Undefined Forcasting Algorithm!')
+                    raise ValueError('Undefined forecasting Algorithm!')
                     
                 #recuperem la llibreria correcte
                 a = __import__(impo1,globals(), locals(),[impo2])
-                Forcast_algorithm = eval("a."+impo2 )
+                forecast_algorithm = eval("a."+impo2 )
                 
                 # posem els parametres que ens diuen i creem el model
-                f=Forcast_algorithm()
+                f=forecast_algorithm()
                 f.set_params(**params)
                 f.fit(X,y)
                 score = 'none'
@@ -301,13 +301,13 @@ class Forcaster:
             return [model_select, X_new, y]
 
         """
-        A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forcasting (create_model - crear i guardar el model, i forcasting - recuperar i utilitzar el model)
+        A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forecasting (create_model - crear i guardar el model, i forecasting - recuperar i utilitzar el model)
         """
         
         def create_model(self, data, y, look_back={-1:[25,48]}, extra_vars={'variables':['Dia','Hora','Mes'], 'festius':['ES','CT']},
                          colinearity_remove_level=0.9, feature_selection='Tree', algorithm='RF', params=None, escalat=None, max_time=None):
             """
-            Funcio per crear, guardar i configurar el model de forcasting.
+            Funcio per crear, guardar i configurar el model de forecasting.
                 datasetin - pandas dataframe amb datetime com a index, format de sempre...
                 
                 y - nom de la columne amb la variable objectiu
@@ -344,7 +344,7 @@ class Forcaster:
                                     'MLP' = MLPRegressor
                                     'PLS' = PLSRegression
                 
-                params - Es un dict per pasar els parametres que es passaran a l'algorisme de forcasting utilitzat,
+                params - Es un dict per pasar els parametres que es passaran a l'algorisme de forecasting utilitzat,
                          En el cas que sigui None i es fara un randomized search per buscar els parametres.
 
                 escalat - Tipus d'escalat que s'aplica a les dades:
@@ -391,7 +391,7 @@ class Forcaster:
             #  Finalment un cop tenim el model configurat el guardem en un Object storer
             ###
 
-            # Guardem els diferents models i configuracions que necessitarem per despres poder executar el forcast
+            # Guardem els diferents models i configuracions que necessitarem per despres poder executar el forecast
             self.db['model'] = model
             self.db['scaler'] = scaler
             self.db['model_select'] = model_select
@@ -404,7 +404,7 @@ class Forcaster:
             if self.debug:  # m'interessa veure quan s'ha guardat un model, per saber per on va i que tot ha anat bé
                 print('Model guardat!  Score:' + str(score))
 
-        def forcast(self, data):
+        def forecast(self, data):
             """
             Funcio que fa la prediccio.
             

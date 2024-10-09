@@ -2,7 +2,7 @@ import math
 import numpy as np
 import requests
 import joblib
-import forcaster as forecast
+import forecaster as forecast
 import pandas as pd
 from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor
@@ -96,7 +96,7 @@ data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression=
 data.index = pd.to_datetime(data.index)
 
 # Initialize the forecaster with debug mode
-forecaster = forecast.Forcaster(debug=True)
+forecaster = forecast.forecaster(debug=True)
 
 # Create a forecasting model using the combined data
 forecaster.create_model(

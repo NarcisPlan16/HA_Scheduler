@@ -1,7 +1,7 @@
 import math
 import requests
 import joblib
-import forcaster as forecast  # Import the forecasting module
+import forecaster as forecast  # Import the forecasting module
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -111,7 +111,7 @@ def Start(request_to_api):
     #data.index = pd.to_datetime(data.index)
 
     # Create and save the forecasting model
-    forecaster = forecast.Forcaster(debug=True)
+    forecaster = forecast.forecaster(debug=True)
     forecaster.create_model(
         data=data,
         y='state',  # Target variable for forecasting
@@ -127,11 +127,11 @@ def Start(request_to_api):
 
     # Load the saved model for forecasting
     cons_model = joblib.load("Consumption_model.joblib")
-    cons_forecaster = forecast.Forcaster(debug=True)
+    cons_forecaster = forecast.forecaster(debug=True)
     cons_forecaster.db = cons_model  # Assign loaded model to forecaster
 
     # Print the forecasted values for the next 48 hours
-    print(cons_forecaster.forcast(data[0:48]))
+    print(cons_forecaster.forecast(data[0:48]))
 
     # The following commented code is for visualization (if needed)
     """

@@ -7,9 +7,9 @@ import holidays
 import warnings
 warnings.filterwarnings('ignore')
 
-class Forcaster:
+class forecaster:
         """
-        Classe Forcaster per a la creació i gestió de models de predicció basats en dades temporals.
+        Classe forecaster per a la creació i gestió de models de predicció basats en dades temporals.
 
         Aquesta classe proporciona una sèrie de mètodes per:
         - Inicialitzar i configurar models de predicció.
@@ -33,7 +33,7 @@ class Forcaster:
             - Model(X, y, algorithm, params, max_time): Realitza una cerca aleatòria per trobar la millor configuració per a un model.
             - treu_atrs(X, y, metode): Realitza la selecció d'atributs sobre el conjunt de dades.
             - create_model(data, y, look_back, extra_vars, colinearity_remove_level, feature_selection, algorithm, params, escalat, max_time): Crea i configura un model de predicció.
-            - forcast(data): Realitza la predicció sobre les dades proporcionades.
+            - forecast(data): Realitza la predicció sobre les dades proporcionades.
             - timestamp_to_attrs(dad, extra_vars): Crea variables addicionals basades en el timestamp.
             - scalate_data(data, escalat): Escala les dades utilitzant diferents mètodes.
             - save_model(filename): Desa el model actual en un fitxer.
@@ -272,7 +272,7 @@ class Forcaster:
                     
                     # Importem la llibreria correcta per a l'algoritme actual
                     a = __import__(impo1, globals(), locals(), [impo2])
-                    Forcast_algorithm = eval("a."+impo2)
+                    forecast_algorithm = eval("a."+impo2)
                     
                     try:
                         # Creem i avaluem els models un a un
@@ -282,7 +282,7 @@ class Forcaster:
                             j = 0
                         
                         for params in sampler:
-                            regr = Forcast_algorithm(**params)
+                            regr = forecast_algorithm(**params)
                             pred_test = regr.fit(X_train, y_train).predict(X_test)
                             act = mean_absolute_error(y_test, pred_test)
                             if best_mae > act:
@@ -323,10 +323,10 @@ class Forcaster:
                 
                 # Importem la llibreria correcta
                 a = __import__(impo1, globals(), locals(), [impo2])
-                Forcast_algorithm = eval("a." + impo2)
+                forecast_algorithm = eval("a." + impo2)
                 
                 # Ajustem el model amb els paràmetres indicats
-                f = Forcast_algorithm()
+                f = forecast_algorithm()
                 f.set_params(**params)
                 f.fit(X, y)
                 score = 'none'  # No es calcula cap mètrica en aquest cas
@@ -387,9 +387,9 @@ class Forcaster:
             return [model_select, X_new, y]
 
 
-        # A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forcasting 
+        # A partir d'aqui tenim les 2 funcions que controlen tot el funcionament del forecasting 
         # create_model() - crear i guardar el model
-        # forcasting() - recuperar i utilitzar el model 
+        # forecasting() - recuperar i utilitzar el model 
         def create_model(self, data, y, look_back={-1:[25,48]}, extra_vars={'variables':['Dia','Hora','Mes'], 'festius':['ES','CT']},
                          colinearity_remove_level=0.9, feature_selection='Tree', algorithm='RF', params=None, escalat=None, max_time=None):
             """
@@ -475,7 +475,7 @@ class Forcaster:
             if self.debug:  # M'interessa saber quan s'ha guardat un model per seguir el progrés
                 print('Model guardat!  Score:' + str(score))
 
-        def forcast(self, data):
+        def forecast(self, data):
             """
             Funció que realitza la predicció sobre les dades proporcionades.
             
