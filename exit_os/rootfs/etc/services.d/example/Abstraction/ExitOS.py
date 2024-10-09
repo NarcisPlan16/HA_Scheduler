@@ -1,4 +1,5 @@
-# Exit OS "class". Main program
+# Exit OS "class". Main program that runs the optimization algorithm. It is responsible for the optimization of the assets.
+
 import math
 import time
 import json
@@ -13,12 +14,10 @@ import ForecastersManager
 
 import numpy as np
 import pandas as pd
-
 #import matplotlib.pyplot as plt
 #import cProfile # Uncomment for debug
 #import pyswarms as ps
 #import pyswarms.backend.topology as ps_tp
-
 from Solution import Solution
 from AbsConsumer import AbsConsumer
 from AbsGenerator import AbsGenerator
@@ -29,15 +28,18 @@ from Configurator import Configurator
 from geneticalgorithm.geneticalgorithm import geneticalgorithm
 from datetime import datetime, timedelta
 
+# Setup the connection with the Home Assistant API
 ha_url = "http://192.168.0.117:8123"
 bearer_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmZThlNTgyNDBhYTA0M2UwOTYyMmRmZWJlMTc5MDc0YyIsImlhdCI6MTcxOTMwNDY4NiwiZXhwIjoyMDM0NjY0Njg2fQ.j8euYQxDWMkJJqHNpTXUBE1rrhpOm1Vr-WcY3fdt8q0"
-# If for some reason, we are getting a code 401 (Unauthorized) and previously we didn0t, try creating a new bearer token
+# Note: If for some reason, we are getting a code 401 (Unauthorized) and previously we didn0t, try creating a new bearer token
 
+# Http request headers
 headers = {
     "Authorization": f"Bearer {bearer_token}",
     "Content-Type": "application/json",
 }
 
+# Logging setup to print log messages to the console
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -48,99 +50,113 @@ logger = logging.getLogger(__name__)
 # Example usage
 #logger.info("AAAAAAAAAAAAAAAAAA")
 
+# Main class ExitOS
 class ExitOS:
     """
-    ExitOS class. This class is responsible for the optimization of the assets. Uses the forecasters to perform the optimization.
+    Class responsible for optimizing energy assets using different forecasting methods and optimization algorithms.
 
     Attributes
     -----------
-    Here are only the most relevant attributes.
     maxiter : int
-        Maximum number of iterations for the model to perform the optimization.
+        Maximum number of iterations for the optimization model.
     hores_simular : int
-        Number of hours to perform the optimization.
-    electricity_prices: list
-        Hourly buying prices of the electricity (Automatically calculated using an API).
-    electricity_sell_prices: list
-        Hourly selling prices of the electricity.
-    latitude: float
-        Latitude where we want to get the meteo data.
-    longitude: float
-        Longitude where we want to get the meteo data.
-    meteo_data: DataFrame
-        Pandas dataframe with the meteorological data prediction for the next day and the data of today. 
-        For example, if predicting the next -hores_simular- hours, this parameter must have size (-hores_simular- * 2, n).
-    kwargs_for_simulating: dict
-        Dictionary with arguments to pass to the simulation code. This parameter helps the simulation code of each asset get the desired information 
-        and enables communication between assets as you can store here values and retrieve them with another asset simulation code.
+        Number of hours to simulate for the optimization process.
+    electricity_prices : list
+        Hourly electricity prices for buying.
+    electricity_sell_prices : list
+        Hourly electricity sell prices.
+    latitude : float
+        Latitude used to fetch meteorological data.
+    longitude : float
+        Longitude used to fetch meteorological data.
+    meteo_data : DataFrame
+        Meteorological data predictions for the simulation period.
+    kwargs_for_simulating : dict
+        Arguments passed to the simulation function, shared between assets for interaction during simulation.
     """
 
     def __init__(self):
+        # Initialization of key attributes
+        self.connections = []  # List to store network connections
+        self.progress = []  # Track optimization progress (cost at each iteration)
+        self.debug = True  # Debug mode flag
+        self.console_debug = False  # Flag to debug using console
 
-        self.connections = []
-        self.progress = []  # Array with the best cost value on each step
-        self.debug = True  # Indicates if we are on debug mode
-        self.console_debug = False  # Indicates if we want to run and debug the code by console.
-        # If set to true and not executing from elan_os folder, we will get errors
-        self.maxiter = 30  # 20
-        # Parameter for the configurator to get the correct path depending on where we execute the code
+        self.maxiter = 30  # Maximum number of iterations for optimization
 
-        self.hores_simular = 24
-        self.hidrogen_price = 1.6
-        self.consumer_invalid_solutions = 0  # Total invalid solution for the consumers, just for debug purposes
-        self.generator_invalid_solutions = 0
+        self.hores_simular = 24  # Hours to simulate for the optimization process
+        self.hidrogen_price = 1.6  # Price of hydrogen, relevant for optimization
 
+        self.consumer_invalid_solutions = 0  # Counter for invalid consumer solutions (for debugging)
+        self.generator_invalid_solutions = 0  # Counter for invalid generator solutions (for debugging)
+
+        # Retrieve electricity buying prices from external source
         self.electricity_prices = self.__obtainElectricityPrices()
-        self.electricity_sell_prices = [0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054,
-                                        0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054, 0.054]
-        
+
+        # Fixed electricity sell prices (dummy data)
+        self.electricity_sell_prices = [0.054] * 24
+
+        # Location data to fetch meteorological data
         self.latitude = "41.963138"
         self.longitude = "2.831640"
+
+        # Fetch meteorological data based on latitude and longitude
         self.meteo_data = ForecastersManager.obtainMeteoData(self.latitude, self.longitude)
+
+        # Initialize empty lists for forecasts
         self.electrcity_production_forecast = []
         self.electricity_consumption_forecast = []
 
+        # Initialize solutions (initial and final)
         self.solucio_run = Solution()
         self.solucio_final = Solution()
 
+        # Asset details for consumers, generators, and energy sources
         self.n_assets = 0
         self.assets = {
-            'Buildings': {
-                'Consumption': [], 
-                'Generation': []
-            }, 
+            'Buildings': {'Consumption': [], 'Generation': []}, 
             'Consumers': {}, 
             'EnergySources': {}, 
             'Generators': {}
-        }
-        # TODO: Improve to create an entry for each folder in Asset_types automatically
+        } # TODO: Improve to create an entry for each folder in Asset_types automatically
 
+        # Key arguments for simulation that allows communication between different assets
         self.kwargs_for_simulating = {}
-        # key arguments for those assets that share a common restriction and
-        # one execution affects the others assets execution
-
 
     def __obtainElectricityPrices(self):
-        
+        """
+        Fetches the hourly electricity prices for buying from the OMIE API.
+        If the next day's data is unavaliable, today's data is fetched.
+
+        Returns
+        -----------
+        hourly_prices : list
+            List of hourly electricity prices for buying.
+        """
+        # Calculate the date for tomorrow
         tomorrow = datetime.today() + timedelta(1)
         tomorrow_str = tomorrow.strftime('%Y%m%d')
+
+        # Fetch electricity price data from OMIE
         url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
-
-
         response = requests.get(url)
-        if response.status_code != "200":
+
+        # If tomorrow's prices are unavailable, fallback to today's data
+        if response.status_code != 200:
             today = datetime.today().strftime('%Y%m%d')
             url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{today}.1"
             response = requests.get(url)
 
+        # Save the retrieved data into a CSV file
         with open("omie_price_pred.csv", 'wb') as f:
             f.write(response.content)
 
+        # Parse the CSV to extract hourly prices
         hourly_prices = []
         with open('omie_price_pred.csv', 'r') as file:
             for line in file.readlines()[1:-1]:
                 components = line.strip().split(';')
-                components.pop(-1) # delete blank character at the end
+                components.pop(-1)  # Remove trailing blank entry
                 hourly_price = float(components[-1])
                 hourly_prices.append(hourly_price)
 
@@ -148,19 +164,17 @@ class ExitOS:
     
     def __preparePredData(self, type: str):
         """
-        Prepares the data for the prediction type specified as parameter -type-
+        Prepares data for the prediction model for consumption or generation.
 
         Parameters
-        -----------
+        ----------
         type : str
-            String specifying the prediction type.
-            * Consumption
-            * Generation
-        -----------
+            The type of data to prepare: 'Consumption' or 'Generation'.
+
         Returns
-        -----------
-        Returns a DataFrame with the data needed for the specified type of prediction. For now, only a Dataframe with Timestamp - State 
-        but on new versions would be good to add all relevant attributes so the forecasters can perform better.
+        -------
+        DataFrame
+            A DataFrame containing the timestamp and state for the past 24 hours and future prediction data.
         """
         
         dictionary = {'Timestamp': [], 'state': []}
@@ -173,45 +187,55 @@ class ExitOS:
         today_str =  (today + pd.Timedelta(hours=1)).strftime('%Y-%m-%d')
         tomorrow_str = tomorrow.strftime('%Y-%m-%d')
 
-        for building_type in self.solucio_run.buildings[type]:  # each building type (Consumption or Generation)
-
+        # Iterate through each building type in the solution (e.g., Consumption, Generation)
+        for building_type in self.solucio_run.buildings[type]:
             try:
+                # Fetch building data from Home Assistant API
                 response = requests.get(
-                        f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
-                        headers=headers)
-                                
+                    f"{ha_url}/api/history/period/" + today_str + "T00:00:00?end_time=" + tomorrow_str + "T00:00:00&filter_entity_id=" + building_type,
+                    headers=headers
+                )
                 response_data = response.json()[0]
-                data = pd.DataFrame()
-                data = data.from_dict(response_data)
+                data = pd.DataFrame.from_dict(response_data)
 
-                state_data = data['state']
-                if len(data['state']) < 24:  # No available data for past 24h
-                    
-                    print("[WARNING]: No data found for previous 24h. Searching previous data and using its mean value")
-                    #TODO mean = self.__calcMissingValueFiller(today, building_type) 
-                    mean = 0
-
-                    for i in range (0, 24):
+                # Fill missing data if less than 24 hours of past data is available
+                if len(data['state']) < 24:
+                    print("[WARNING]: No data found for previous 24h. Using mean value as fallback")
+                    mean = 0  # Placeholder for future improvement
+                    for i in range(0, 24):
                         date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
                         res.loc[len(res.index)] = [date, mean]
-
-                else: # Available data for past 24h
-                    for i in range (0, 24): # Add previos hours data rows
+                else:
+                    for i in range(0, 24):
                         date = pd.to_datetime(today + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
-                        res.loc[len(res.index)] = [date, state_data[i]]
+                        res.loc[len(res.index)] = [date, data['state'][i]]
 
-                # Add prediction rows
-                for i in range (0, 24):
+                # Add prediction data for the next 24 hours
+                for i in range(0, 24):
                     date = pd.to_datetime(start_of_tomorrow + timedelta(hours=i)).strftime('%Y-%m-%d %H:%M:%S')
                     res.loc[len(res.index)] = [date, 0]
 
             except KeyError:
-                print(f"[ERROR]: Couldn't get {building_type} state")
-        
+                print(f"[ERROR]: Couldn't get state data for {building_type}")
+
         return res
     
     def __calcMissingValueFiller(self, today, building_type):
+        """
+        Calculates the fallback value for missing data by averaging data from the last 7 days.
 
+        Parameters
+        ----------
+        today : datetime
+            Today's date and time.
+        building_type : str
+            Type of building asset to calculate missing data for.
+
+        Returns
+        -------
+        float
+            Mean value used to fill missing data.
+        """
         found = False
         i = 0
         data = pd.DataFrame()
