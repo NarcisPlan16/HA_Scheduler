@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Exit OS
-version: "4.5"
+version: "4.5.1" #new version
 slug: exit_os
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/exit_os"
