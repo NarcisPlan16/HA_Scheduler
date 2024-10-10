@@ -10,7 +10,7 @@ This repository contains a custom Home Assistant add-on, **ExitOS**, designed fo
 
 This repository contains the following add-ons:
 
-### [Exit OS](./exit_os)
+### [ExitOS](./exit_os)
 
 ![Supports aarch64 Architecture][aarch64-shield]
 ![Supports amd64 Architecture][amd64-shield]
@@ -18,7 +18,7 @@ This repository contains the following add-ons:
 ![Supports armv7 Architecture][armv7-shield]
 ![Supports i386 Architecture][i386-shield]
 
-_Exit OS manages a smart energy network by integrating various energy assets, such as buildings, consumers, and generators. It allows users to simulate energy production and consumption, making it ideal for energy communities._
+_ExitOS manages a smart energy network by integrating various energy assets, such as buildings, consumers, and generators. It allows users to simulate energy production and consumption, making it ideal for energy communities._
 
 ### Features
 
