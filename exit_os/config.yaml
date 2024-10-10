@@ -11,21 +11,21 @@ arch:
   - amd64
   - i386
 init: false
-apparmor: true
+# apparmor: true
 boot: manual
 ###############
 # Try to solve api issues
 homeassistant_api: true
 auth_api: true
 hassio_api: true
-hassio_role: default
-roles:
-  - homeassistant
+# hassio_role: default
+# roles:
+#  - homeassistant
 ###############
 map:
   - share:rw
   - addon_config:rw
-  - addons:r
+  #- addons:r
 options:
   Controllable_Consumer_asset_IDs: []
   Controllable_Generator_asset_IDs: []
