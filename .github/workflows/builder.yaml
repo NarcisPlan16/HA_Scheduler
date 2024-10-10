@@ -31,9 +31,9 @@ jobs:
         id: addons
         uses: home-assistant/actions/helpers/find-addons@master
 
-      - name: Clean Rekor cache
-        run: |
-          rm -rf ~/.rekor
+      #- name: Clean Rekor cache
+      #  run: |
+      #    rm -rf ~/.rekor
 
       - name: Get changed add-ons
         id: changed_addons
