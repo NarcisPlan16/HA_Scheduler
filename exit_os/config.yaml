@@ -1,0 +1,56 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
+name: Exit OS
+version: "4.5.1" #new version
+slug: exit_os
+description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
+url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/exit_os"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+init: false
+# apparmor: true
+boot: manual
+###############
+# Try to solve api issues
+homeassistant_api: true
+auth_api: true
+hassio_api: true
+# hassio_role: default
+# roles:
+#  - homeassistant
+###############
+map:
+  - share:rw
+  - addon_config:rw
+  #- addons:r
+options:
+  Controllable_Consumer_asset_IDs: []
+  Controllable_Generator_asset_IDs: []
+  Controllable_Energy_Source_asset_IDs: []
+  Base_Building_consumption_IDs: []
+  Base_Building_generation_IDs: []
+  Simulation_code_directory: /config/ExitOS/MySimulationCode
+  Classes_code_directory: /config/ExitOS/MyClassesCode
+
+schema:
+  Controllable_Consumer_asset_IDs: 
+    - description: "Controllable assets that consume energy."
+    - match(^(.+)$) # TODO: Generate a new regex
+  Controllable_Generator_asset_IDs:
+    - description: "Contollable generators that produce energy."
+    - match(^(.+)$) # TODO: Generate a new regex
+  Controllable_Energy_Source_asset_IDs:
+    - description: "Contollable batteries, solar panels, etc."
+    - match(^(.+)$) # TODO: Generate a new regex
+  Base_Building_consumption_IDs:
+    - description: "Fixed consumption of the building."
+    - match(^(.+)$) # TODO: Generate a new regex
+  Base_Building_generation_IDs:
+    - description: "Fixed generation of the building."
+    - match(^(.+)$) # TODO: Generate a new regex
+  Simulation_code_directory: str
+  Classes_code_directory: str
+
