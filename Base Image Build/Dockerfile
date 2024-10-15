@@ -1,7 +1,8 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
 
 #FROM ghcr.io/home-assistant/aarch64-base-python:latest
-FROM ghcr.io/home-assistant/aarch64-base-ubuntu:20.04
+#FROM ghcr.io/home-assistant/aarch64-base-ubuntu:20.04
+FROM ghcr.io/home-assistant/amd64-base-ubuntu:20.04
 
 ENV PATH="${PATH}:/usr/lib/bashio"
 
