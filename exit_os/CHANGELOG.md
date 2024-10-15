@@ -1,4 +1,7 @@
 <!-- https://developers.home-assistant.io/docs/add-ons/presentation#keeping-a-changelog -->
+## 4.5.1
+- Rebranding
+- Bug fixes
 
 ## 4.5
 - Started the implementation of the forecasters
