@@ -1,4 +1,4 @@
-# Optimal Scheduler Add-on
+# Exit OS Add-on
 
 ## How to use
 
