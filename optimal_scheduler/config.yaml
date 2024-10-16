@@ -37,19 +37,19 @@ options:
 
 schema:
   Controllable_Consumer_asset_IDs:
-    - description: "Controllable assets that consume energy."
+    #- description: "Controllable assets that consume energy."
     - match: "^(.+)$"  # TODO: Define a more specific regex if needed
   Controllable_Generator_asset_IDs:
-    - description: "Controllable generators that produce energy."
+    #- description: "Controllable generators that produce energy."
     - match: "^(.+)$"  # TODO: Define a more specific regex if needed
   Controllable_Energy_Source_asset_IDs:
-    - description: "Controllable batteries, solar panels, etc."
+    #- description: "Controllable batteries, solar panels, etc."
     - match: "^(.+)$"  # TODO: Define a more specific regex if needed
   Base_Building_consumption_IDs:
-    - description: "Fixed consumption of the building."
+    #- description: "Fixed consumption of the building."
     - match: "^(.+)$"  # TODO: Define a more specific regex if needed
   Base_Building_generation_IDs:
-    - description: "Fixed generation of the building."
+    #- description: "Fixed generation of the building."
     - match: "^(.+)$"  # TODO: Define a more specific regex if needed
   Simulation_code_directory: str
   Classes_code_directory: str
