@@ -5,7 +5,6 @@ slug: optimal_scheduler
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
 arch:
-  - armhf
   - armv7
   - aarch64
   - amd64
