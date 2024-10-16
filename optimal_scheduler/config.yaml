@@ -27,20 +27,15 @@ options:
   Simulation_code_directory: /config/OptimalScheduler/MySimulationCode
   Classes_code_directory: /config/OptimalScheduler/MyClassesCode
 schema:
-  Controllable_Consumer_asset_IDs:
-    #description: "Controllable assets that consume energy."
-    - match(^(.+)$)  # TODO: Define a more specific regex if needed
-  Controllable_Generator_asset_IDs:
-    #- description: "Controllable generators that produce energy."
-    - match(^(.+)$)  # TODO: Define a more specific regex if needed
-  Controllable_Energy_Source_asset_IDs:
-    #- description: "Controllable batteries, solar panels, etc."
-    - match(^(.+)$)  # TODO: Define a more specific regex if needed
-  Base_Building_consumption_IDs:
-    #- description: "Fixed consumption of the building."
-    - match(^(.+)$)  # TODO: Define a more specific regex if needed
-  Base_Building_generation_IDs:
-    #- description: "Fixed generation of the building."
-    - match(^(.+)$)  # TODO: Define a more specific regex if needed
+  Controllable_Consumer_asset_IDs: #"Controllable assets that consume energy."
+    - match(^(.+)$)  
+  Controllable_Generator_asset_IDs: #"Controllable generators that produce energy."
+    - match(^(.+)$)  
+  Controllable_Energy_Source_asset_IDs: #"Controllable batteries, solar panels, etc."
+    - match(^(.+)$)  
+  Base_Building_consumption_IDs: #"Fixed consumption of the building."
+    - match(^(.+)$) 
+  Base_Building_generation_IDs: #"Fixed generation of the building."
+    - match(^(.+)$) 
   Simulation_code_directory: str
   Classes_code_directory: str
