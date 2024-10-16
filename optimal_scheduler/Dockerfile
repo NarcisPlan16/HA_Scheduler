@@ -8,7 +8,6 @@ ARG BUILD_FROM
 FROM ${BUILD_FROM}
 # not sure if needed:
 ENV PATH="${PATH}:/usr/lib/bashio"
-
 RUN apt update \
     && apt install -y dos2unix python3 python3-pip \
     && pip install --upgrade pip \
@@ -18,7 +17,6 @@ RUN apt update \
 # Copy root filesystem
 COPY rootfs /
 COPY config.yaml config.yaml
-
 # Run dos2unix on all python files
 RUN dos2unix ./etc/services.d/example/Abstraction/*.py
 
