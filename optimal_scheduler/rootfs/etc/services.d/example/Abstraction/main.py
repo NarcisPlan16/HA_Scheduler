@@ -178,7 +178,7 @@ def startSimulation(paired_entities):
         print("+-----------------------------------------------------------------------------------------+")
 
 if __name__ == "__main__":
-
+    
     headers = {
         "Authorization": f"Bearer {bearer_token}", #str(sys.argv[1]) for SUPERVISED_TOKEN
         "Content-Type": "application/json",
