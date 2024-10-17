@@ -6,7 +6,6 @@
 #FROM ghcr.io/home-assistant/amd64-base-ubuntu:20.04
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
-# not sure if needed:
 ENV PATH="${PATH}:/usr/lib/bashio"
 RUN apt update \
     && apt install -y dos2unix python3 python3-pip \
