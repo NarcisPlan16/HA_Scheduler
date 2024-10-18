@@ -8,7 +8,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class Forcaster:
+class forecaster:
         def __init__(self, debug = False):
             """
             Constructor per defecte

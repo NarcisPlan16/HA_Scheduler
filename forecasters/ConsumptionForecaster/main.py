@@ -2,7 +2,7 @@ import math
 import requests
 import joblib
 
-import forcaster as forecast
+import forecaster as forecast
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -86,7 +86,7 @@ def Start(request_to_api):
     data = pd.read_json('Data_Plus_MeteoForecast.json', orient='split', compression='infer')
     #data.index = pd.to_datetime(data.index)
 
-    forecaster = forecast.Forcaster(debug=True)
+    forecaster = forecast.forecaster(debug=True)
     forecaster.create_model(
         data=data,
         y='state',
@@ -101,7 +101,7 @@ def Start(request_to_api):
     forecaster.save_model("Consumption_model.joblib")
 
     cons_model = joblib.load("Consumption_model.joblib")
-    cons_forecaster = forecast.Forcaster(debug=True)
+    cons_forecaster = forecast.forecaster(debug=True)
     cons_forecaster.db = cons_model
 
     print(cons_forecaster.forcast(data[0:48]))

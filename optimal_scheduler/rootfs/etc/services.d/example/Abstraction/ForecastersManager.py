@@ -3,17 +3,17 @@ import requests
 import joblib
 import os
 
-import forcaster as forecast
+import forecaster as forecast
 from datetime import datetime, timedelta
 
 # Create the prediction and the consumption forecasters from the given models
 current_dir = os.getcwd()
 prod_model = joblib.load(current_dir + "/Abstraction/Forecaster Models/Generation_model.joblib")
-prod_forecaster = forecast.Forcaster(debug=True)
+prod_forecaster = forecast.forecaster(debug=True)
 prod_forecaster.db = prod_model
 
 cons_model = joblib.load(current_dir + "/Abstraction/Forecaster Models/Consumption_model.joblib")
-cons_forecaster = forecast.Forcaster(debug=True)
+cons_forecaster = forecast.forecaster(debug=True)
 cons_forecaster.db = cons_model
 
 def obtainMeteoData(latitude, longitude):
