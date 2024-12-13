@@ -126,7 +126,6 @@ class OptimalScheduler:
         tomorrow_str = tomorrow.strftime('%Y%m%d')
         url = f"https://www.omie.es/es/file-download?parents%5B0%5D=marginalpdbc&filename=marginalpdbc_{tomorrow_str}.1"
 
-
         response = requests.get(url)
         if response.status_code != "200":
             today = datetime.today().strftime('%Y%m%d')
