@@ -16,7 +16,6 @@ init: false
 homeassistant_api: true
 auth_api: true
 hassio_api: true
-hassio_role: default
 roles:
   - homeassistant
 ###############
