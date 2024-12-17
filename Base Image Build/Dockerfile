@@ -1,17 +1,19 @@
-# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
+# Usa una base que ja tingui Python preinstal·lat
+FROM ghcr.io/home-assistant/aarch64-base-python:latest
 
-#FROM ghcr.io/home-assistant/aarch64-base-python:latest
-FROM ghcr.io/home-assistant/aarch64-base-ubuntu:20.04
-
+# Configura el PATH per accedir a Bashio
 ENV PATH="${PATH}:/usr/lib/bashio"
 
-RUN apt update
-RUN apt-get update
-RUN apt-get install dos2unix
-RUN apt-get install python3 -y
-RUN apt-get install python3-pip -y 
+# Actualitza i instal·la dependències en una sola línia
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        dos2unix \
+        python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
-#RUN apt install g++ gfortran pkgconfig cmake openblas openblas-dev
+# Actualitza pip
 RUN pip install --upgrade pip
+
+# Instal·la els paquets Python necessaris
 RUN pip install scikit-learn psutil func_timeout requests numpy pandas pyswarms tomli
 
