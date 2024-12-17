@@ -1,23 +1,24 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Optimal Scheduler
-version: "4.5"
 slug: optimal_scheduler
+
 description: Scheduler & optimizer add-on for smart grids for energy management and cost savings.
+version: "4.5"
+
 url: "https://github.com/NarcisPlan16/HA_Scheduler/tree/main/optimal_scheduler"
+init: false
+
 arch:
   - armv7
   - aarch64
   - amd64
   - i386
-init: false
 
 ###############
 # Try to solve api issues
 homeassistant_api: true
-auth_api: true
 hassio_api: true
-roles:
-  - homeassistant
+
 ###############
 map:
   - share:rw
